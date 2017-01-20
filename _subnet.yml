@@ -1,0 +1,28 @@
+# this is a configuration file for subnet.py
+# use YAML to set your configuration
+
+#example(remove the # in first column):
+#net1:
+#    - bjfs
+#    - chan
+#net2:
+#    - wuhn
+#    - kunm
+
+net1:
+    - bjfs
+    - chan
+    - daej
+    - suwn
+
+net2:
+    - shao
+    - wuhn
+    - kunm
+    - hkws
+
+net3:
+    - bjfs
+    - urum
+    - lhaz
+    - urus

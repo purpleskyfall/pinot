@@ -1,0 +1,58 @@
+# this is a configuration file for unificate.py
+# use YAML to set your configuration
+
+# use lower letter in site name
+
+#example(remove the # in first column):
+# all:
+#     observer: sdcors
+#     rm_sys:[R, E]
+#     obs_type: ['C1', 'C2', 'P1', 'P2', 'L1', 'L2']
+#     interval: 30
+#     delta: "0.0000        0.0000        0.0000"
+
+# bjfs:
+#     receiver: "TRIMBLE NETR8"
+#     antenna: "TRM59900.00     SCIS"
+#     position: "-2148744.8407  4426642.9605  4044657.8518"
+#     delta: "0.0465        0.0000        0.0000"
+
+all:
+    observer: sdcors
+    agency: sdcors
+    rm_sys:
+        - R
+        - E
+    obs_type: ['C1', 'C2', 'P1', 'P2', 'L1', 'L2']
+    interval: 30
+    delta: "0.0000        0.0000        0.0000"
+
+bjfs:
+    receiver: "TRIMBLE NETR8"
+    antenna: "TRM59900.00     SCIS"
+    position: "-2148744.8407  4426642.9605  4044657.8518"
+    delta: "0.0465        0.0000        0.0000"
+    observer: CASM
+
+chan:
+    receiver: "ASHTECH UZ-12"
+    antenna: "ASH701945E_M    NONE"
+    position: "-2674431.9143  3757145.2969  4391528.8732"
+    delta: "0.0000        0.0000        0.0000"
+    interval: 60
+
+daej:
+    receiver: "TRIMBLE NETR9"
+    antenna: "TRM59800.00     SCIS"
+    position: "-3120042.1634  4084614.0910  3764027.5733"
+    delta: "0.0000        0.0000        0.0000"
+    agency: KASI
+    observer: KASI/KOREA    
+    interval: 60
+
+shao:
+    receiver: "ASHTECH UZ-12"
+    antenna: "AOAD/M_T        JPLA"
+    position: "-2831733.5830  4675665.9580  3275369.4100"
+    delta: "0.0814        0.0000        0.0000"
+    agency: KASI/KOREA
