@@ -24,6 +24,7 @@ Pinot 程序包目前包含以下脚本：
 - metacheck.py
 - orderfiles.py
 - qualitycheck.py
+- renamesite.py
 - sitecheck.py
 - subnet.py
 - trimble2rnx.py
@@ -32,7 +33,7 @@ Pinot 程序包目前包含以下脚本：
 
 ## 作者信息
 
-Developer by: Jon Jiang & Maosheng Zhou
+Develop by: Jon Jiang & Maosheng Zhou
 
 First upload: 2017-01-20
 

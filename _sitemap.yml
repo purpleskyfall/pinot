@@ -1,0 +1,13 @@
+# this is a configuration file for unificate.py
+# use YAML to set your configuration
+
+# use lower letter in site name
+
+#example(remove the # in first column):
+# bjfs: beij
+# chan: chch
+# wuhn: wuha
+
+bjfs: beij
+chan: chch
+wuhn: wuha
