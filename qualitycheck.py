@@ -118,15 +118,17 @@ def execteqc(file, outtype):
         #获取质量检查结果并删除结果文件
         outputs = getqualitymarks(resultfile, outtype)
         os.remove(resultfile)
+    #获取文件观测日期
+    dateofdata = getdate(getyear(filename), getdoy(filename))
+    strdate = dateofdata.strftime('%Y-%m-%d')
     #输出检查结果，检查是否以列表形式输出
     if outtype == 'list' or outtype == 'l':
         print('\n' + file + ' quality marks:')
+        print('date: ' + strdate)
         for output in outputs:
             print(output)
     #以表格形式输出
     else:
-        dateofdata = getdate(getyear(filename), getdoy(filename))
-        strdate = dateofdata.strftime('%Y-%m-%d')
         outputs.insert(0, strdate.center(12, ' '))
         outputs.insert(0, filename.center(16, ' '))
         print(''.join(outputs))
@@ -181,7 +183,7 @@ def init_args():
     parser.add_argument('-r', '--recursive', action='store_true'\
                         , help='search file in child folder')
     parser.add_argument('-v', '--version', action='version'\
-                        , version='qualitycheck.py 0.1.9')
+                        , version='qualitycheck.py 0.2.0')
     parser.add_argument('-dir', metavar='<input_dir>', default='./'\
                         , help='input dir mode [default: current]')
     parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][oO]'\
