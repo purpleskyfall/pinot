@@ -84,8 +84,8 @@ def compareinfo(info, file, threshold, outtype):
     #检查是否有不同
     if len(differences):
         if outtype == 'list' or outtype == 'l':
-            print(file + ' has differences:')
-        print('\n'.join(differences), end='\n\n')
+            print('\n' + file + ' has differences:')
+        print('\n'.join(differences))
 
 #检查输入文件夹中的与通配符匹配的文件
 #globstr: 通配符, srcpath: 输入文件夹, sitesinfo: 站点信息表, outtype: 消息输出类型, threshold: 先验坐标阈值, recursive: 是否递归
@@ -132,17 +132,17 @@ def main(args):
     print('source dirs: ' + srcdirs)
     print('file mode: ' + globstr)
     print('config file: ' + args.cfg)
-    print('----------------------------------------------', end='\n\n')
+    print('----------------------------------------------')
     #若输出形式为表格，则首先打印一个表头
     if outtype == 'table' or outtype == 't':
-        print('file'.center(16, ' ') + 'type'.center(14, ' ') + 'cfgfile'.center(46, ' ') \
+        print('\n' + 'file'.center(16, ' ') + 'type'.center(14, ' ') + 'cfgfile'.center(46, ' ') \
                 + 'obsfile'.center(46, ' '))
     #开始检查
     for srcdir in glob.glob(srcdirs):
         checksite(globstr, srcdir, sitesinfo, outtype, threshold, args.recursive)
     #输出配置文件中找不到的站点
     if len(MISSINGSITES) > 0:
-        print('\n' + 'these sites not found in cfg file: ' + ', '.join(MISSINGSITES))
+        print('\n' + 'sites not found in cfg file: ' + ', '.join(MISSINGSITES))
 
     return 0
 
