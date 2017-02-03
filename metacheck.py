@@ -29,6 +29,7 @@ def compareinfo(info, file, threshold, outtype):
     "Compare site info and rinex file"
     #header用于保持文件头信息，differences用于保持不一致处
     header, differences = [], []
+    filename = os.path.basename(file)
     ofile = open(file)
     #加载文件头信息
     while True:
@@ -76,7 +77,7 @@ def compareinfo(info, file, threshold, outtype):
                     differences.append(item + ' in obs file: ' \
                                 + fileinfostr.strip())
                 else:
-                    message = file.center(40, ' ') + item.center(14, ' ') \
+                    message = filename.center(16, ' ') + item.center(14, ' ') \
                             + info[item].center(46, ' ') + fileinfostr.strip().center(46, ' ')
                     differences.append(message)
                 break
@@ -134,7 +135,7 @@ def main(args):
     print('----------------------------------------------', end='\n\n')
     #若输出形式为表格，则首先打印一个表头
     if outtype == 'table' or outtype == 't':
-        print('file'.center(40, ' ') + 'type'.center(14, ' ') + 'cfgfile'.center(46, ' ') \
+        print('file'.center(16, ' ') + 'type'.center(14, ' ') + 'cfgfile'.center(46, ' ') \
                 + 'obsfile'.center(46, ' '))
     #开始检查
     for srcdir in glob.glob(srcdirs):
@@ -156,7 +157,7 @@ def init_args():
     #添加所需参数信息
     parser.add_argument('-r', '--recursive', action='store_true'\
                         , help='search file in child folder')
-    parser.add_argument('-v', '--version', action='version', version='metacheck.py 0.3.8')
+    parser.add_argument('-v', '--version', action='version', version='metacheck.py 0.3.9')
     parser.add_argument('-dir', metavar='<input_dir>', default='./'\
                         , help='input dir mode [default: current]')
     parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][oOdD]'\
