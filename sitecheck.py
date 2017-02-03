@@ -41,9 +41,15 @@ def main(args):
     sites = yaml.load(cfgfile)
     cfgfile.close()
     srcdir, doy, year = args.dir, args.doy, args.yr
+    #将年积日补齐为3位
+    doy = doy.rjust(3, '0')
     #验证输入的年
     if not(year.isdigit() and (len(year) == 2 or len(year) == 4)):
-        print("Error! year of data not vaild!")
+        print("Error! year of data isn't vaild!")
+        return 1
+    #验证输入的年积日
+    if not doy.isdigit() or int(doy) > 366 :
+        print("Error! day of year isn't vaild!")
         return 1
     #输出提示信息
     print('----------------- input params ---------------')
@@ -77,7 +83,7 @@ def init_args():
     parser.add_argument('-r', '--recursive', action='store_true'\
                         , help='search file in child folder')
     parser.add_argument('-v', '--version', action='version'\
-                        , version='sitecheck.py 0.1.1')
+                        , version='sitecheck.py 0.1.2')
     parser.add_argument('-dir', metavar='<input_dir>', default='./'\
                         , help='input dir [default: current]')
     parser.add_argument('-cfg', metavar='<config>', default='_sites.yml'\
