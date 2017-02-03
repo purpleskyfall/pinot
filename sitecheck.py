@@ -62,9 +62,11 @@ def main(args):
     messingsites = []
     for site in sites:
         #检查的文件名
-        filename = site.lower() + doy + '0.' + year[-2:] + 'o'
+        ofilename = site.lower() + doy + '0.' + year[-2:] + 'o'
+        dfilename = site.lower() + doy + '0.' + year[-2:] + 'd'        
         #如果检查的文件不存在，则将站点保存到 messingsites
-        if not existfile(srcdir, filename, args.recursive):
+        if not (existfile(srcdir, ofilename, args.recursive) or \
+                existfile(srcdir, dfilename, args.recursive)):
             messingsites.append(site)
     #若存在找不到的站点，将站点名输出
     if len(messingsites) > 0:
@@ -83,7 +85,7 @@ def init_args():
     parser.add_argument('-r', '--recursive', action='store_true'\
                         , help='search file in child folder')
     parser.add_argument('-v', '--version', action='version'\
-                        , version='sitecheck.py 0.1.2')
+                        , version='sitecheck.py 0.1.3')
     parser.add_argument('-dir', metavar='<input_dir>', default='./'\
                         , help='input dir [default: current]')
     parser.add_argument('-cfg', metavar='<config>', default='_sites.yml'\
