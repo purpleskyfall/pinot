@@ -87,7 +87,7 @@ def init_args():
     parser = argparse.ArgumentParser(description="order rinex files suit IGS style.")
     # 添加所需参数信息
     parser.add_argument('-v', '--version', action='version'\
-                        , version='orderfiles.py 0.1.3')
+                        , version='orderfile.py 0.1.3')
     parser.add_argument('-r', '--recursive', action='store_true'\
                         , help='search file in child folder')
     parser.add_argument('-k', '--keep', action='store_true'\

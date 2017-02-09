@@ -70,7 +70,7 @@ def main(args):
             messingsites.append(site)
     #若存在找不到的站点，将站点名输出
     if len(messingsites) > 0:
-        print('sites not found in ' + year + ' ' + doy + ': ' + ', '.join(messingsites))
+        print('sites not found in ' + year + ' ' + doy + ': ' + ', '.join(messingsites) + '.')
 
     return 0
 

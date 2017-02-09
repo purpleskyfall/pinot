@@ -142,7 +142,7 @@ def main(args):
         checksite(globstr, srcdir, sitesinfo, outtype, threshold, args.recursive)
     #输出配置文件中找不到的站点
     if len(MISSINGSITES) > 0:
-        print('\n' + 'sites not found in cfg file: ' + ', '.join(MISSINGSITES))
+        print('\n' + 'sites not found in cfg file: ' + ', '.join(MISSINGSITES) + '.')
 
     return 0
 
