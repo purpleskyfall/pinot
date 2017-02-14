@@ -91,11 +91,11 @@ def init_args():
                             , help='whether to overwrite existing files')
     parser.add_argument('-r', '--recursive', action='store_true'\
                             , help='search file in child folder')
-    parser.add_argument('-v', '--version', action='version', version='copyfile.py 0.1.3')
+    parser.add_argument('-v', '--version', action='version', version='copyfile.py 0.1.4')
     parser.add_argument('-dir', metavar='<input_dir>', default='./'\
                             , help='input dir mode [default: current]')
-    parser.add_argument('-file', metavar='<type>', nargs='+', default='o'\
-                            , help='type of file: o, q, h, z, met, org, prt. [default: o]')
+    parser.add_argument('-file', metavar='<type>', nargs='+', required=True\
+                            , help='type of file: o, q, h, z, met, org, prt [required]')
     parser.add_argument('-out', metavar='<output>', default='./results'\
                             , help='output directory [default: results in current]')
 
