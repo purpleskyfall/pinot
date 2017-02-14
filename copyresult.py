@@ -69,7 +69,7 @@ def getfile(inputdir, outputdir, filetypes, recursive, force):
 
 def main(args):
     "main function"
-    inputdirs, outputdir, filetypes = args.dir, args.out, args.files
+    inputdirs, outputdir, filetypes = args.dir, args.out, args.file
     #输出提示信息
     print('-------------------------- input params ----------------------------')
     print('source dir: ' + inputdirs)
@@ -94,7 +94,7 @@ def init_args():
     parser.add_argument('-v', '--version', action='version', version='copyfile.py 0.1.3')
     parser.add_argument('-dir', metavar='<input_dir>', default='./'\
                             , help='input dir mode [default: current]')
-    parser.add_argument('-files', metavar='<type>', nargs='+', default='o'\
+    parser.add_argument('-file', metavar='<type>', nargs='+', default='o'\
                             , help='type of file: o, q, h, z, met, org, prt. [default: o]')
     parser.add_argument('-out', metavar='<output>', default='./results'\
                             , help='output directory [default: results in current]')
