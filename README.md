@@ -31,6 +31,9 @@ Pinot 程序包目前包含以下脚本：
 - unificate.py
 - up2lower.py
 
+## 文档索引
+Pinot 脚本文档请移步：[Pinot 脚本文档索引目录][4]。
+
 ## 作者信息
 
 Develop by: Jon Jiang & Maosheng Zhou
@@ -40,3 +43,4 @@ First upload: 2017-01-20
 [1]: https://www.unavco.org/software/data-processing/teqc/teqc.html
 [2]: http://kb.unavco.org/kb/article/trimble-runpkr00-v5-40-latest-version-mac-osx-10-7-windows-xp-7-linux-solaris-744.html
 [3]: http://www-gpsg.mit.edu/~simon/gtgk/
+[4]: http://gnss.help/2017/02/16/pinot-content/
