@@ -19,6 +19,8 @@ QUALITYINFO = [{'name': 'start', 'flag': 'Time of start of window :', 'start': 3
                 , {'name': 'SN2', 'flag': 'Mean S2                 :', 'start': 26, 'end': 31, 'len': 9}]
 #MP1, MP2, CSR信息的标志
 MPCSRFLAG = 'first epoch    last epoch    hrs   dt  #expt  #have   %   mp1   mp2 o/slps'
+#质量检查操作可能输出的其他文件
+ANOTHERFILE = ['.azi', '.ele', '.iod', '.ion', '.mp1', '.mp2', '.sn1', '.sn2']
 
 #返回一个表头
 def tableheader():
@@ -118,6 +120,11 @@ def execteqc(file, outtype):
         #获取质量检查结果并删除结果文件
         outputs = getqualitymarks(resultfile, outtype)
         os.remove(resultfile)
+    #删除质量检查操作可能输出的其他文件
+    for filetype in ANOTHERFILE:
+        tempfile = os.path.join(filedir, filename[0:-4] + filetype)
+        if os.path.exists(tempfile):
+            os.remove(tempfile)
     #获取文件观测日期
     dateofdata = getdate(getyear(filename), getdoy(filename))
     strdate = dateofdata.strftime('%Y-%m-%d')
@@ -183,7 +190,7 @@ def init_args():
     parser.add_argument('-r', '--recursive', action='store_true'\
                         , help='search file in child folder')
     parser.add_argument('-v', '--version', action='version'\
-                        , version='qualitycheck.py 0.2.0')
+                        , version='qualitycheck.py 0.2.1')
     parser.add_argument('-dir', metavar='<input_dir>', default='./'\
                         , help='input dir mode [default: current]')
     parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][oO]'\
