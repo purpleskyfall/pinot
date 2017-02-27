@@ -20,7 +20,7 @@ QUALITYINFO = [{'name': 'start', 'flag': 'Time of start of window :', 'start': 3
 #MP1, MP2, CSR信息的标志
 MPCSRFLAG = 'first epoch    last epoch    hrs   dt  #expt  #have   %   mp1   mp2 o/slps'
 #质量检查操作可能输出的其他文件
-ANOTHERFILE = ['.azi', '.ele', '.iod', '.ion', '.mp1', '.mp2', '.sn1', '.sn2']
+OTHERFILES = ['.azi', '.ele', '.iod', '.ion', '.mp1', '.mp2', '.sn1', '.sn2']
 
 #返回一个表头
 def tableheader():
@@ -121,7 +121,7 @@ def execteqc(file, outtype):
         outputs = getqualitymarks(resultfile, outtype)
         os.remove(resultfile)
     #删除质量检查操作可能输出的其他文件
-    for filetype in ANOTHERFILE:
+    for filetype in OTHERFILES:
         tempfile = os.path.join(filedir, filename[0:-4] + filetype)
         if os.path.exists(tempfile):
             os.remove(tempfile)
