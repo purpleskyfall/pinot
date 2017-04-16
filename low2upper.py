@@ -2,7 +2,7 @@
 # this script is used to rename files' name, upper to lower
 # creater: Jon Jiang
 # datetime: 2016-12-20
-"rename files' name, upper to lower"
+"""Rename files' name, upper to lower"""
 
 import os
 import shutil
@@ -11,7 +11,7 @@ import glob
 #若文件夹不存在则创建
 #dirpath: 文件夹路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath)
         os.mkdir(dirpath)
@@ -19,7 +19,7 @@ def createdir(dirpath):
 # 重命名函数
 # 参数表 srcpath: 输入文件夹, outpath: 输出文件夹, globstr: 通配符, recursive: 是否递归
 def low2upper(srcpath, outpath, globstr, keep, recursive):
-    "rename file name upper to lower"
+    """rename file name upper to lower"""
     # 如果输出文件夹为空，则在当前文件夹下执行重命名操作
     if outpath is None:
         for file in glob.glob(os.path.join(srcpath, globstr)):
@@ -46,7 +46,7 @@ def low2upper(srcpath, outpath, globstr, keep, recursive):
                 low2upper(childpath, outpath, globstr, keep, recursive)
 
 def main(args):
-    "main function"
+    """main function"""
     srcdirs, outpath, globstr = args.dir, args.out, args.glob
     # 若用户设置了 keep 且输出文件夹为空，则报错
     if args.keep and outpath is None:
@@ -65,7 +65,7 @@ def main(args):
 
 #脚本初始化方法，解析用户的输入参数
 def init_args():
-    "Initilize function"
+    """Initilize function"""
     #引入参数解析模块
     import argparse
     #创建解析器

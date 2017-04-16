@@ -4,7 +4,7 @@
 # datetime: 2017-01-03
 # Python version: 3.4
 
-"a GNSS files order script, make files suit IGS style"
+"""a GNSS files order script, make files suit IGS style"""
 
 import os
 import glob
@@ -17,7 +17,7 @@ RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.*\.\d{2}.$', re.I)
 #检查文件夹，若不存在则创建
 #参数表：dirpath: 文件夹路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath)
         os.mkdir(dirpath)
@@ -27,7 +27,7 @@ def createdir(dirpath):
 #如果用户设置了 recursive 选项，则递归地搜索子文件夹的内容
 #参数表：srcpath: 源文件路径, globstr: 需处理文件通配符, outputdir: 输出文件夹, keep: 是否保留源文件, recursive: 是否递归
 def orderdir(srcpath, globstr, outputdir, keep, recursive):
-    "order dir to IGS style, recursive if setted"
+    """order dir to IGS style, recursive if setted"""
     # 遍历符合通配符的文件进行处理
     for file in glob.glob(os.path.join(srcpath, globstr)):
         filename = os.path.basename(file)
@@ -62,7 +62,7 @@ def orderdir(srcpath, globstr, outputdir, keep, recursive):
 # 程序主函数
 # 参数表：args: 用户输入参数
 def main(args):
-    "main function"
+    """main function"""
     # 从用户输入获取输入文件夹、输出文件夹、搜索通配符
     srcdirs, outpath, globstr = args.dir, args.out, args.glob
     # 打印输出提示
@@ -80,7 +80,7 @@ def main(args):
 
 # 初始化函数，解析用户输入参数
 def init_args():
-    "parse user input"
+    """parse user input"""
     # 引入参数解析模块
     import argparse
     # 创建解析器

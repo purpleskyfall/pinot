@@ -5,7 +5,7 @@
 #creater: Zhou Maosheng
 #Python version: 3.4
 
-"a script translate trimble t00 file to rinex"
+"""Translate trimble t00 file to rinex"""
 
 import os
 import glob
@@ -14,7 +14,7 @@ import shutil
 #检查并创建文件夹
 #参数表 dirpath: 结果输出路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath + '\n')
         os.mkdir(dirpath)
@@ -22,7 +22,7 @@ def createdir(dirpath):
 #将天宝原始数据转化为 dat 数据
 #参数表：inputdir: 输入文件的路径, outputdir: 结果输出路径, year: 需要处理的数据的年份 recursive:是否递归查找子文件夹
 def trimble2dat(inputdir, outputdir, year, globstr, recursive):
-    "a function of trimble2rinex"
+    """a function of trimble2rinex"""
     for file in glob.glob(os.path.join(inputdir, globstr)):
         tempdir = os.path.join(outputdir, 'temp')
         print('translate file: ' + file)
@@ -38,7 +38,7 @@ def trimble2dat(inputdir, outputdir, year, globstr, recursive):
 #将天宝 dat 数据转为 rinex 数据
 #参数表：tempdir: dat文件输出的临时文件夹路径, outputdir: rinex文件输出文件夹, year: 要处理的数据的年份
 def dat2rnx(tempdir, outputdir, year):
-    " a function of datfile2rinexfile"
+    """a function of datfile2rinexfile"""
     #需使用TEQC进行处理的数据集列表
     listfile = []
     #对temp文件夹的文件进行遍历
@@ -69,7 +69,7 @@ def dat2rnx(tempdir, outputdir, year):
         os.system(command)
 
 def main(args):
-    "main function"
+    """main function"""
     inputdirs, outputdir, year, globstr = args.dir, args.out, args.yr, args.glob
     #检查输入的年份是否合法
     if not (year.isdigit() and (len(year) != 2 or len(year) != 4)) or year == ' ':
@@ -98,7 +98,7 @@ def main(args):
     return 0
 
 def init_args():
-    "parse the user input"
+    """parse the user input"""
     #引入参数解析模块
     import argparse
     #解析用户输入参数

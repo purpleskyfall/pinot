@@ -4,14 +4,14 @@
 #creater: Jon Jiang
 #Python version: 3.4
 
-"check if obs file exist in folder by a sites list in YAML"
+"""check if obs file exist in folder by a sites list in YAML"""
 
 import os
 
 #检查某文件夹内是否存在指定文件
 #参数表：dirpath: 文件夹路径, filename: 文件名, recursive: 是否递归
 def existfile(dirpath, filename, recursive):
-    "check if file exist in dirpath"
+    """check if file exist in dirpath"""
     #如果 dirpath 中存在 filename, 返回 True
     if os.path.exists(os.path.join(dirpath, filename)):
         return True
@@ -29,7 +29,7 @@ def existfile(dirpath, filename, recursive):
 #主函数
 #args: 输入参数
 def main(args):
-    "main function"
+    """main function"""
     # 引入 PyYAML 模块
     import yaml
     # 检查配置文件是否存在
@@ -75,7 +75,7 @@ def main(args):
     return 0
 
 def init_args():
-    "Initilize function"
+    """Initilize function"""
     #引入 argparse 模块用于解析用户输入
     import argparse
     #创建解析器

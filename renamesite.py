@@ -4,7 +4,7 @@
 # datetime: 2017-01-03
 # Python version: 3.4
 
-"rename GNSS file by a YAML configuration"
+"""rename GNSS file by a YAML configuration"""
 
 import os
 import glob
@@ -17,7 +17,7 @@ RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.*\.\d{2}[a-z]$', re.I)
 # 检查文件夹，若不存在则创建
 # 参数表：dirpath: 文件夹路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath)
         os.mkdir(dirpath)
@@ -26,7 +26,7 @@ def createdir(dirpath):
 # 参数表：srcdir: 输入文件夹, globstr: 通配符, outpath: 输出文件夹,
 # sitemap: 站名映射表, keep: 是否保留源文件, recursive: 是否递归
 def rename(srcdir, globstr, outpath, sitemap, keep, recursive):
-    "rename files in dir"
+    """rename files in dir"""
     for file in glob.glob(os.path.join(srcdir, globstr)):
         # 获取文件名、站点名
         filename = os.path.basename(file)
@@ -60,7 +60,7 @@ def rename(srcdir, globstr, outpath, sitemap, keep, recursive):
 # 主函数
 # 参数表：args: 用户输出参数
 def main(args):
-    "main function"
+    """main function"""
     import yaml
     # 获取配置文件
     if not os.path.exists(args.cfg):
@@ -88,7 +88,7 @@ def main(args):
     return 0
 
 def init_args():
-    "parser user input"
+    """parser user input"""
     # 引入模块
     import argparse
     # 创建解析器

@@ -5,7 +5,7 @@
 #modifer: Jon Jiang
 #Python version: 3.4
 
-"this script is used to unificate rinex files by a config.yml file"
+"""Unificate rinex files by a config.yml file"""
 
 #引入所需模块
 import os
@@ -31,7 +31,7 @@ MUTEXCOUNT = threading.Lock()
 #若文件夹不存在则创建
 #dirpath: 文件夹路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath)
         os.mkdir(dirpath)
@@ -39,7 +39,7 @@ def createdir(dirpath):
 #返回配置文件中某个站点的信息，若没有该站点，返回 all 中的信息作为默认配置
 #site: 站点名; cfgfile: 配置文件
 def getinfo(site, sitesinfo):
-    "Get information from cfgfile"
+    """Get information from cfgfile"""
     #获得特定站点的信息
     site = site.lower()
     info = sitesinfo.get(site, {})
@@ -56,7 +56,7 @@ def getinfo(site, sitesinfo):
 #将用户配置信息转化为对应的TEQC参数
 #info: 站点配置信息
 def getparams(info):
-    "Get teqc params from user config info"
+    """Get teqc params from user config info"""
     params = ''
     #遍历站点信息中的项目
     for key in info:
@@ -76,7 +76,7 @@ def getparams(info):
 #使用 os.system() 方法执行 TEQC 程序进行标准化
 #参数表：file: 文件及路径, params: teqc 参数, outputpath: 输出路径
 def teqc(file, params, outputpath):
-    "execute system command by os.system()"
+    """execute system command by os.system()"""
     global THREADCOUNT
     filename = os.path.basename(file)
     os.system('teqc' + params + ' ' + file + ' > ' + os.path.join(outputpath, filename)) #执行TEQC
@@ -88,7 +88,7 @@ def teqc(file, params, outputpath):
 #采用异步多线程的方式执行命令
 #参数表：commands: 待执行命令列表
 def runtaskasync(commands):
-    "execute commands async"
+    """execute commands async"""
     global THREADCOUNT
     thread = None
     while len(commands) > 0:
@@ -111,7 +111,7 @@ def runtaskasync(commands):
 #对输入文件夹内所有符合通配符的文件进行处理
 #globstr: 通配符; srcpath: 源文件夹路径; outputpath: 输出文件夹; sitesinfo: 用户配置信息; recursive: 是否递归搜索
 def process(globstr, srcpath, outputpath, sitesinfo, recursive):
-    "Unificate rinex files by user config info"
+    """Unificate rinex files by user config info"""
     commands = [] #用于保存所需执行的teqc命令的数组
     #遍历与通配符匹配的文件，将需执行的命令加入 commands
     for file in glob.glob(os.path.join(srcpath, globstr)):
@@ -135,7 +135,7 @@ def process(globstr, srcpath, outputpath, sitesinfo, recursive):
 #主函数
 #args: 命令行参数表
 def main(args):
-    "Main function"
+    """Main function"""
     import time
     import yaml
     #检查配置文件是否存在
@@ -169,7 +169,7 @@ def main(args):
 
 #脚本初始化方法，解析用户的输入参数
 def init_args():
-    "Initilize function"
+    """Initilize function"""
     import argparse
     #创建解析器
     parser = argparse.ArgumentParser(description=\

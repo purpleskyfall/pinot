@@ -6,7 +6,7 @@
 #modifier: Jon Jiang
 #Python version: 3.4
 
-"This is a script for checking site information"
+"""This is a script for checking site information"""
 
 import os
 import glob
@@ -26,7 +26,7 @@ MISSINGSITES = []
 #比较站点信息与RINEX文件
 #info: 站点信息, file: 观测文件
 def compareinfo(info, file, threshold, outtype):
-    "Compare site info and rinex file"
+    """Compare site info and rinex file"""
     #header用于保持文件头信息，differences用于保持不一致处
     header, differences = [], []
     filename = os.path.basename(file)
@@ -90,7 +90,7 @@ def compareinfo(info, file, threshold, outtype):
 #检查输入文件夹中的与通配符匹配的文件
 #globstr: 通配符, srcpath: 输入文件夹, sitesinfo: 站点信息表, outtype: 消息输出类型, threshold: 先验坐标阈值, recursive: 是否递归
 def checksite(globstr, srcpath, sitesinfo, outtype, threshold, recursive):
-    "Check site info, search children folder in recursive is set"
+    """Check site info, search children folder in recursive is set"""
     #对符合通配符的文件进行遍历
     for file in glob.glob(os.path.join(srcpath, globstr)):
         filename = os.path.basename(file)
@@ -116,7 +116,7 @@ def checksite(globstr, srcpath, sitesinfo, outtype, threshold, recursive):
 #主函数
 #args: 输入参数
 def main(args):
-    "Main function"
+    """Main function"""
     #引入 PyYAML 模块
     import yaml
     #检查配置文件是否存在
@@ -148,7 +148,7 @@ def main(args):
 
 #脚本初始化方法，解析用户的输入参数
 def init_args():
-    "Initilize function"
+    """Initilize function"""
     #引入 argparse 模块用于解析用户输入
     import argparse
     #创建解析器

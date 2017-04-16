@@ -2,7 +2,7 @@
 # this script is used to rename files' name, upper to lower
 # creater: Jon Jiang
 # datetime: 2017-03-26
-"Convert GSI compact RINEX into standard RINEX"
+"""Convert GSI compact RINEX into standard RINEX"""
 
 import os
 import re
@@ -14,7 +14,7 @@ CRINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.*\.\d{2}[d]$', re.I)
 #若文件夹不存在则创建
 #dirpath: 文件夹路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath)
         os.mkdir(dirpath)
@@ -22,7 +22,7 @@ def createdir(dirpath):
 #调用 crx2rnx 程序进行文件转化
 #srcdir: 输出文件夹; outdir: 输出文件夹; globstr: 文件名通配符; keep: 保留源文件; recursive: 递归标记
 def crx2rnx(srcdir, outdir, globstr, keep, recursive):
-    "convert compact rinex files"
+    """convert compact rinex files"""
     for file in glob.glob(os.path.join(srcdir, globstr)):
         # 获取 compact rinex 文件名
         crxname = os.path.basename(file)
@@ -48,7 +48,7 @@ def crx2rnx(srcdir, outdir, globstr, keep, recursive):
 
 
 def main(args):
-    "main function"
+    """main function"""
     srcdirs, outdir, globstr = args.dir, args.out, args.glob
     # 若输出文件夹不存在则创建
     if outdir is not None:
@@ -64,7 +64,7 @@ def main(args):
 
 #脚本初始化方法，解析用户的输入参数
 def init_args():
-    "Initilize function"
+    """Initilize function"""
     #引入参数解析模块
     import argparse
     #创建解析器

@@ -5,7 +5,7 @@
 #creater: Jon Jiang
 #Python version: 3.4
 
-"this script is used to create the subnets by a _subnet.yml file."
+"""this script is used to create the subnets by a _subnet.yml file."""
 
 #引入所需模块
 import os
@@ -15,7 +15,7 @@ import glob
 #若文件夹不存在则创建
 #dirpath: 文件夹路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath)
         os.mkdir(dirpath)
@@ -23,7 +23,7 @@ def createdir(dirpath):
 #指定文件夹内搜索文件并拷贝
 #site: 站名; globstr: 通配符; srcpath: 源文件夹; aimpath: 目标文件夹; recursive: 是否递归搜索
 def copysite(site, globstr, srcpath, aimpath, recursive):
-    "Copy site rinex file, if recursive is true, search child folder"
+    """Copy site rinex file, if recursive is true, search child folder"""
     #搜索本文件夹内的文件
     for file in glob.glob(os.path.join(srcpath, globstr)):
         filename = os.path.basename(file)
@@ -40,7 +40,7 @@ def copysite(site, globstr, srcpath, aimpath, recursive):
 #主函数
 #args: 命令行参数表
 def main(args):
-    "Main function"
+    """Main function"""
     import yaml
     #检查配置文件是否存在
     if not os.path.exists(args.cfg):
@@ -75,7 +75,7 @@ def main(args):
 
 #脚本初始化方法，解析用户的输入参数
 def init_args():
-    "Initilize function"
+    """Initilize function"""
     #引入参数解析模块
     import argparse
     #创建解析器

@@ -4,7 +4,8 @@
 #last modify: 2017/1/5
 #creater: Zhou Maosheng
 #Python version: 3.4
-"a script of leica2rinex"
+"""Convert leica receiver data to rinex"""
+
 import os
 import argparse
 import glob
@@ -12,7 +13,7 @@ import glob
 #检查并创建文件夹
 #参数表 outdir:结果输出路径
 def createdir(outdir):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(outdir):
         print('make dir: ' + outdir + '\n')
         os.makedirs(outdir)
@@ -20,7 +21,7 @@ def createdir(outdir):
 #徕卡原始数据转rinex数据
 #参数表：inputdir: 输入文件的路径, outputdir: 结果输出路径, year: 需要处理的数据的年份 recursive:是否递归查找子文件夹
 def leica2rnx(inputdir, outputdir, year, globstr, recursive):
-    "a function of leica2rinex"
+    """a function of leica2rinex"""
     listfile = []
     for file in glob.glob(os.path.join(inputdir, globstr)):
         #获取到文件的站名和年积日，如bjfs001
@@ -52,7 +53,7 @@ def leica2rnx(inputdir, outputdir, year, globstr, recursive):
                 leica2rnx(childpath, outputdir, year, globstr, recursive)
 
 def main(args):
-    "main function"
+    """main function"""
     inputdirs, outputdir, year, globstr = args.dir, args.out, args.yr, args.glob
     #检查输入的年份是否合法
     if not (year.isdigit() and (len(year) != 2 or len(year) != 4)):
@@ -74,7 +75,7 @@ def main(args):
     return 0
 
 def init_args():
-    "parse the user input"
+    """parse the user input"""
     parser = argparse.ArgumentParser(description='translate leica m00 file to rinex.')
     #添加所需参数信息
     parser.add_argument('-r', '--recursive', action='store_true'\

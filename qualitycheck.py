@@ -3,7 +3,7 @@
 # creater: Jon Jiang
 # datetime: 2016-12-20
 # Python version: 3.4
-"a RINEX obs files quality check script used TEQC"
+"""a RINEX obs files quality check script used TEQC"""
 
 import os
 import glob
@@ -24,7 +24,7 @@ OTHERFILES = ['.azi', '.ele', '.iod', '.ion', '.mp1', '.mp2', '.sn1', '.sn2']
 
 #返回一个表头
 def tableheader():
-    "create a table header"
+    """create a table header"""
     tabheaders = []
     tabheaders.append('file'.center(16, ' '))
     tabheaders.append('date'.center(12, ' '))
@@ -39,21 +39,21 @@ def tableheader():
 #从RINEX格式Obs文件返回年
 #参数表：filename: 文件名
 def getyear(filename):
-    "get 4 digit year from rinex obs filename"
+    """get 4 digit year from rinex obs filename"""
     year = int(filename[-3:-1])
     return 2000 + year if year < 80 else 1900 + year
 
 #从RINEX格式Obs文件返回年积日
 #参数表：filename: 文件名
 def getdoy(filename):
-    "get day of year from rinex obs filename"
+    """get day of year from rinex obs filename"""
     doy = filename[4:7]
     return int(doy)
 
 #将年与年积日转换到日期
 #参数表：year: 年, doy: 年积日
 def getdate(year, doy):
-    "translate year and doy to date"
+    """translate year and doy to date"""
     import datetime
     initdate = datetime.date(year, 1, 1)
     delta = datetime.timedelta(doy - 1)
@@ -64,7 +64,7 @@ def getdate(year, doy):
 #从质量检查结果文件中获取质量指标
 #参数表：resultfile: 结果文件, outtype: 输出类型
 def getqualitymarks(resultfile, outtype):
-    "return qualitycheck marks from result file, list or table"
+    """return qualitycheck marks from result file, list or table"""
     outputs = []
     resultreader = open(resultfile)
     infoindex = 0 #需要检查的信息的索引号
@@ -107,7 +107,7 @@ def getqualitymarks(resultfile, outtype):
 #执行TEQC程序进行数据质量检查
 #参数表：file: obs文件及路径
 def execteqc(file, outtype):
-    "exec TEQC quality check"
+    """exec TEQC quality check"""
     #分离文件路径、文件名
     filedir, filename = os.path.split(file)
     #获取质量检查结果文件路径
@@ -143,7 +143,7 @@ def execteqc(file, outtype):
 #进行质量检查
 #参数表: srcpath: 观测文件路径, globstr: 观测文件通配符, recursive: 是否递归
 def qualitycheck(srcpath, globstr, outtype, recursive):
-    "check obs quality by TEQC"
+    """check obs quality by TEQC"""
     for file in glob.glob(os.path.join(srcpath, globstr)):
         filename = os.path.basename(file)
         #使用正则表达式检查文件名是否为RINEX
@@ -161,7 +161,7 @@ def qualitycheck(srcpath, globstr, outtype, recursive):
 #主函数
 #参数表: args: 用户输入参数表
 def main(args):
-    "main function"
+    """main function"""
     srcdirs, globstr, outtype = args.dir, args.glob, args.out
     #输出提示
     print('----------------- input params ---------------')
@@ -181,7 +181,7 @@ def main(args):
 
 #脚本初始化方法，解析用户的输入参数
 def init_args():
-    "Initilize function"
+    """Initilize function"""
     #引入参数解析模块
     import argparse
     #创建解析器

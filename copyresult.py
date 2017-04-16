@@ -6,7 +6,7 @@
 #modifier: Jon Jiang
 #Python version: 3.4
 
-"Copy the GAMIT/GLOBK result file "
+"""Copy the GAMIT/GLOBK result file """
 
 import os
 import shutil
@@ -25,14 +25,14 @@ OTHERDIR = ['archive', 'brdc', 'igs', 'control', 'figs', 'gfiles', 'glbf', \
 #检查并创建文件夹
 #参数表：dirpath: 文件夹路径
 def createdir(dirpath):
-    "Create new directory if not exist"
+    """Create new directory if not exist"""
     if not os.path.exists(dirpath):
         print('make dir: ' + dirpath)
         os.makedirs(dirpath)
 
 #获取文件并实现数据拷贝
 def getfile(inputdir, outputdir, filetypes, recursive, force):
-    "copy result file by filetypes from inputdir to outputdir"
+    """copy result file by filetypes from inputdir to outputdir"""
     #循环输入的文件类型
     for filetype in filetypes:
         #若输入的文件类型不在预设 FILEGLOB 内，则跳过
@@ -68,7 +68,7 @@ def getfile(inputdir, outputdir, filetypes, recursive, force):
                 getfile(childpath, outputdir, filetypes, recursive, force)
 
 def main(args):
-    "main function"
+    """main function"""
     inputdirs, outputdir, filetypes = args.dir, args.out, args.file
     #输出提示信息
     print('-------------------------- input params ----------------------------')
@@ -83,7 +83,7 @@ def main(args):
     return 0
 
 def init_args():
-    "init function, parse user input"
+    """init function, parse user input"""
     import argparse
     parser = argparse.ArgumentParser(description='copy GAMIT/GLOBK result files.')
     #添加所需参数信息
