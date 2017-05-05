@@ -1,95 +1,111 @@
 #coding=UTF-8
-#this script is used to convert trimble file to rinex file.
 #create date: 2017/1/2
-#last modify: 2017/1/5
 #creater: Zhou Maosheng
 #Python version: 3.4
-"""Convert leica receiver data to rinex"""
+
+"""Convert leica m00 file to RINEX"""
 
 import os
-import argparse
+import sys
 import glob
+import argparse
 
-#检查并创建文件夹
-#参数表 outdir:结果输出路径
-def createdir(outdir):
+
+# dir_path: directory path
+def createdir(dir_path):
     """Create new directory if not exist"""
-    if not os.path.exists(outdir):
-        print('make dir: ' + outdir + '\n')
-        os.makedirs(outdir)
 
-#徕卡原始数据转rinex数据
-#参数表：inputdir: 输入文件的路径, outputdir: 结果输出路径, year: 需要处理的数据的年份 recursive:是否递归查找子文件夹
-def leica2rnx(inputdir, outputdir, year, globstr, recursive):
-    """a function of leica2rinex"""
-    listfile = []
-    for file in glob.glob(os.path.join(inputdir, globstr)):
-        #获取到文件的站名和年积日，如bjfs001
+    if not os.path.exists(dir_path):
+        print('create directory: %s' %dir_path)
+        os.makedirs(dir_path)
+
+
+# src_dir: source directory, out_dir: output directory,
+# glob_str: glob string, year: year of data observation,
+# recursive: search file recursively
+def leica2rnx(src_dir, out_dir, year, glob_str, recursive):
+    """Convert leica m00 file to RINEX using TEQC"""
+
+    file_list = []
+    for file in glob.glob(os.path.join(src_dir, glob_str)):
+        # get site and doy in filename
         filename = os.path.basename(file)[0:7]
-        #转换前的文件名
-        sourcefile = os.path.join(inputdir, filename + '?.' +  'm00')
-        if sourcefile not in listfile:
-            listfile.append(sourcefile)
+        # get global mode of source files
+        sourcefile = os.path.join(src_dir, filename + '?.' +  'm00')
+        if sourcefile not in file_list:
+            file_list.append(sourcefile)
 
-    for sourcefile in listfile:
+    for sourcefile in file_list:
+        # name of output file
         rinexfile = os.path.basename(sourcefile)[0:7] + '0.' + year + 'o'
         gfile = os.path.basename(sourcefile)[0:7] + '0.' + year + 'g'
         nfile = os.path.basename(sourcefile)[0:7] + '0.' + year + 'n'
-        #rinex o文件路径 glonass导航文件路径 gps导航文件路径
-        rnxfilepath = os.path.join(outputdir, rinexfile.lower())
-        gfilepath = os.path.join(outputdir, gfile.lower())
-        nfilepath = os.path.join(outputdir, nfile.lower())
-        command = 'teqc +nav ' + nfilepath + ',' + gfilepath + \
-                  ' ' + sourcefile + ' > ' + rnxfilepath
-        print('generate file: ' + rinexfile.lower() +' '+ \
-              gfile.lower() + ' ' + nfile.lower() + ' ......')
+        # path of output file
+        rnxfilepath = os.path.join(out_dir, rinexfile.lower())
+        gfilepath = os.path.join(out_dir, gfile.lower())
+        nfilepath = os.path.join(out_dir, nfile.lower())
+        # run teqc
+        print('generate file: %s %s %s ......' %(rinexfile, nfile, gfile))
+        command = ('teqc +nav ' + nfilepath + ',' + gfilepath + 
+                    ' ' + sourcefile + ' > ' + rnxfilepath)
         os.system(command)
-    #如果有-r参数，则进行递归查找
-    if recursive:
-        for child in os.listdir(inputdir):
-            childpath = os.path.join(inputdir, child)
-            #如果是符合条件的文件夹，则进入查
-            if os.path.isdir(childpath):
-                leica2rnx(childpath, outputdir, year, globstr, recursive)
 
+    # process subfolders if --recursive is setted
+    if recursive:
+        for child in os.listdir(src_dir):
+            child_path = os.path.join(src_dir, child)
+            if os.path.isdir(child_path):
+                leica2rnx(child_path, out_dir, year, glob_str, recursive)
+
+
+# args: user input arguments
 def main(args):
-    """main function"""
-    inputdirs, outputdir, year, globstr = args.dir, args.out, args.yr, args.glob
-    #检查输入的年份是否合法
+    """Main function"""
+
+    src_dir, out_dir, year, glob_str = args.dir, args.out, args.yr, args.glob
+    # valid the input year
     if not (year.isdigit() and (len(year) != 2 or len(year) != 4)):
-        print('Parameter ' + year +' is not valid!')
+        print('Parameter %s is not valid!' %year, file=sys.stderr)
         return 1
-    #若输出文件夹不存在
-    createdir(outputdir)
-    print('-------------------- input params ----------------------')
-    print('source  dirs: ' + inputdirs)
-    print('output   dir: ' + outputdir)
-    print('file    mode: ' + globstr)
-    print('year of data: ' + year)
-    print('--------------------------------------------------------\n')
-    #获取两位年份
     year = year[-2:]
-    for inputdir in glob.glob(inputdirs):
-        leica2rnx(inputdir, outputdir, year, globstr, args.recursive)
+    createdir(out_dir)
+
+    print('-------------------- input params ----------------------')
+    print('source dirs: %s' %src_dir)
+    print('output dir: %s' %out_dir)
+    print('file mode: %s' %glob_str)
+    print('year of data: %s' %year)
+    print('--------------------------------------------------------\n')
+
+    for directory in glob.glob(src_dir):
+        leica2rnx(directory, out_dir, year, glob_str, args.recursive)
 
     return 0
 
+
 def init_args():
-    """parse the user input"""
-    parser = argparse.ArgumentParser(description='translate leica m00 file to rinex.')
-    #添加所需参数信息
-    parser.add_argument('-r', '--recursive', action='store_true'\
-                            , help='search file in child folder')
-    parser.add_argument('-v', '--version', action='version', version='leica2rnx.py 0.1.5')
-    parser.add_argument('-yr', metavar='<year>', required=True\
-                            , help='year of data [required]')
-    parser.add_argument('-dir', metavar='<input_dir>', default='./'\
-                            , help='input dir mode [default: current]')
-    parser.add_argument('-out', metavar='<output>', default='rinex'\
-                            , help='output directory [default: rinex in current]')
-    parser.add_argument('-glob', metavar='<mode>', default='*.[Tt]02'\
-                        , help='mode is filename search mode [default: *.[Tt]02]')
+    """Initilize function, parse user input"""
+
+    # initilize a argument parser
+    parser = argparse.ArgumentParser(
+        description='translate leica m00 file to rinex.')
+    
+    # add arguments
+    parser.add_argument('-v', '--version', action='version',
+                        version='leica2rnx.py 0.1.6')
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='search file in subfolders')
+    parser.add_argument('-yr', metavar='<year>', required=True,
+                        help='year of data [required]')
+    parser.add_argument('-dir', metavar='<input_dir>', default='.',
+                        help='input dir mode [default: current]')
+    parser.add_argument('-glob', metavar='<mode>', default='*.[Mm]00',
+                        help='filename search mode [default: *.[Mm]00]')
+    parser.add_argument('-out', metavar='<output>', default='rinex',
+                        help='output dir [default: rinex in current]')
+
     return main(parser.parse_args())
+
 
 if __name__ == '__main__':
     init_args()

@@ -1,90 +1,110 @@
 #coding=UTF-8
-# this script is used to rename files' name, upper to lower
-# creater: Jon Jiang
-# datetime: 2016-12-20
-"""rename files' name, upper to lower"""
+#creater: Jon Jiang
+#datetime: 2016-12-20
+#Python version: 3.4
+
+"""Rename filename, upper to lower"""
 
 import os
-import shutil
+import sys
 import glob
+import shutil
+import argparse
 
-#若文件夹不存在则创建
-#dirpath: 文件夹路径
-def createdir(dirpath):
+
+# dirpath: directory path
+def createdir(dir_path):
     """Create new directory if not exist"""
-    if not os.path.exists(dirpath):
-        print('make dir: ' + dirpath)
-        os.mkdir(dirpath)
 
-# 重命名函数
-# 参数表 srcpath: 输入文件夹, outpath: 输出文件夹, globstr: 通配符, recursive: 是否递归
-def up2lower(srcpath, outpath, globstr, keep, recursive):
-    """rename file name upper to lower"""
-    # 如果输出文件夹为空，则在当前文件夹下执行重命名操作
-    if outpath is None:
-        for file in glob.glob(os.path.join(srcpath, globstr)):
+    if not os.path.exists(dir_path):
+        print('create directory: %s' %dir_path)
+        os.makedirs(dir_path)
+
+
+# src_dir: source directory, out_dir: output directory,
+# glob_str: glob string, keep: keep input files,
+# recursive: search file recursively
+def up2lower(src_dir, out_dir, glob_str, keep, recursive):
+    """Rename filename, upper to lower"""
+
+    # if the out_dir is None, rename file in original folder
+    if out_dir is None:
+        for file in glob.glob(os.path.join(src_dir, glob_str)):
             filedir, filename = os.path.split(file)
-            print('rename file: ' + file)
+            print('rename file: %s' %file)
             shutil.move(file, os.path.join(filedir, filename.lower()))
-    # 如果输出文件夹不为空且设置了 keep 参数，则拷贝并重命名
+
+    # if the out_dir is not None and --keep is setted, copy and rename
     elif keep:
-        for file in glob.glob(os.path.join(srcpath, globstr)):
+        for file in glob.glob(os.path.join(src_dir, glob_str)):
             filename = os.path.basename(file)
-            print('rename file: ' + file)
-            shutil.copy(file, os.path.join(outpath, filename.lower()))
-    # 如果输出文件夹不为空且未设置 keep 参数，则剪切并重命名
+            print('rename file: %s' %file)
+            shutil.copy(file, os.path.join(out_dir, filename.lower()))
+
+    # if the out_dir is not None and --keep is not setted, move and rename
     else:
-        for file in glob.glob(os.path.join(srcpath, globstr)):
+        for file in glob.glob(os.path.join(src_dir, glob_str)):
             filename = os.path.basename(file)
-            print('rename file: ' + file)
-            shutil.move(file, os.path.join(outpath, filename.lower()))
-    # 是否递归搜索
+            print('rename file: %s' %file)
+            shutil.move(file, os.path.join(out_dir, filename.lower()))
+
+    # process subfolders if --recursive is setted
     if recursive:
-        for child in os.listdir(srcpath):
-            childpath = os.path.join(srcpath, child)
-            if os.path.isdir(childpath):
-                up2lower(childpath, outpath, globstr, keep, recursive)
+        for child in os.listdir(src_dir):
+            child_path = os.path.join(src_dir, child)
+            if os.path.isdir(child_path):
+                up2lower(child_path, out_dir, glob_str, keep, recursive)
 
+
+# args: user input arguments
 def main(args):
-    """main function"""
-    srcdirs, outpath, globstr = args.dir, args.out, args.glob
-    # 若用户设置了 keep 且输出文件夹为空，则报错
-    if args.keep and outpath is None:
-        print('Error! these was a conflict of blank outpath between --keep.')
+    """Main function"""
+
+    src_dir, out_dir, glob_str = args.dir, args.out, args.glob
+
+    # if the out_dir is None and --keep is setted, process as an error
+    if args.keep and out_dir is None:
+        print('Error! blank output_dir is conflict with --keep.', file=sys.stderr)
         return 1
-    if outpath is not None:
-        createdir(outpath)
-    print('-------------------- input params ----------------------')
-    print('source dirs: ' + srcdirs)
-    print('output dir: ' + str(outpath))
-    print('file mode: ' + globstr)
-    print('--------------------------------------------------------', end='\n\n')
-    #开始处理
-    for srcdir in glob.glob(srcdirs):
-        up2lower(srcdir, outpath, globstr, args.keep, args.recursive)
 
-#脚本初始化方法，解析用户的输入参数
+    if out_dir is not None:
+        createdir(out_dir)
+
+    print('---------------------- input params ----------------------')
+    print('source dir: %s' %src_dir)
+    print('output dir: %s' %out_dir)
+    print('file mode: %s' %glob_str)
+    print('----------------------------------------------------------\n')
+
+    for directory in glob.glob(src_dir):
+        up2lower(directory, out_dir, glob_str, args.keep, args.recursive)
+
+    return 0
+
+
 def init_args():
-    """Initilize function"""
-    #引入参数解析模块
-    import argparse
-    #创建解析器
-    parser = argparse.ArgumentParser(description="rename files' name to lower.")
-    #添加所需参数信息
-    parser.add_argument('-k', '--keep', action='store_true'\
-                        , help='keep original file in input dir')
-    parser.add_argument('-r', '--recursive', action='store_true'\
-                        , help='search file in child folder')
-    parser.add_argument('-v', '--version', action='version', version='up2lower.py 0.1.6')
-    parser.add_argument('-dir', metavar='<input_dir>', default='./'\
-                        , help='input dir mode [default: current]')
-    parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][OD]*'\
-                        , help='mode is filename search mode [default: *.[0-9][0-9][OD]*')
-    parser.add_argument('-out', metavar='<output_dir>'\
-                        , help='the output dir, [default: self dir]')
+    """Initilize function, parse user input"""
 
-    #运行主程序方法
+    # initilize a argument parser
+    parser = argparse.ArgumentParser(
+        description="Rename filename, upper to lower.")
+
+    # add arguments
+    parser.add_argument('-v', '--version', action='version',
+                        version='up2lower.py 0.1.7')
+    parser.add_argument('-k', '--keep', action='store_true',
+                        help='keep original file in input dir')
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='search file in child folder')
+    parser.add_argument('-dir', metavar='<input_dir>', default='.',
+                        help='input dir mode [default: current]')
+    parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][OD]*',
+                        help='filename search mode [default: *.[0-9][0-9][OD]*')
+    parser.add_argument('-out', metavar='<output_dir>',
+                        help='output dir, [default: self dir]')
+
     return main(parser.parse_args())
+
 
 if __name__ == '__main__':
     init_args()
