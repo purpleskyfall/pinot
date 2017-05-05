@@ -10,7 +10,7 @@ import re
 import glob
 import argparse
 
-# regex to test if a filename is Compact RINEX
+# test if a filename is Compact RINEX
 CRINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.+\.\d{2}d$', re.I)
 
 

@@ -9,8 +9,8 @@
 """This is a script for checking site information"""
 
 import os
-import glob
 import re
+import glob
 import math
 
 #判别文件名是否为 RINEX 格式 O-文件或 D-文件

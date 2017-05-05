@@ -13,7 +13,7 @@ import yaml
 import shutil
 import argparse
 
-# 正则表达式，测试一个文件是否为RINEX格式
+# test if a filename is RINEX
 RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.+\.\d{2}[a-z]$', re.I)
 
 
@@ -37,7 +37,7 @@ def rename(src_dir, glob_str, out_dir, sitemap, keep, recursive):
         # get filename and site
         filename = os.path.basename(file)
         site = filename[:4].lower()
-        # if file is not match RINEXREG or site is not in sitemap, skip
+        # if file is not match RINEXREG or site is not in sitemap, skip it
         if not RINEXREG.match(filename) or site not in sitemap:
             continue
 
