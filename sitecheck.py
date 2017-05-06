@@ -1,102 +1,104 @@
 #coding=UTF-8
-#This is a script for checking data information.
 #create date: 2017/1/6
 #creater: Jon Jiang
 #Python version: 3.4
 
-"""check if obs file exist in folder by a sites list in YAML"""
+"""Check if RINEX observation file exist in source folder by a sites list in YAML"""
 
 import os
+import sys
+import yaml
+import argparse
 
-#检查某文件夹内是否存在指定文件
-#参数表：dirpath: 文件夹路径, filename: 文件名, recursive: 是否递归
-def existfile(dirpath, filename, recursive):
+
+# dir_path: directory path, filename: name of file,
+# recursive: search file recursively
+def existfile(dir_path, filename, recursive):
     """check if file exist in dirpath"""
-    #如果 dirpath 中存在 filename, 返回 True
-    if os.path.exists(os.path.join(dirpath, filename)):
+    # if file in dir_path, return True
+    if os.path.exists(os.path.join(dir_path, filename)):
         return True
-    #如果用户设置了递归，则继续搜索子文件夹内容
+
+    # process subfolders if --recursive is setted
     if recursive:
-        for child in os.listdir(dirpath):
-            childpath = os.path.join(dirpath, child)
-            #如果当前目录存在子文件夹，继续搜索
-            if os.path.isdir(childpath):
-                if existfile(childpath, filename, recursive):
+        for child in os.listdir(dir_path):
+            child_path = os.path.join(dir_path, child)
+            if os.path.isdir(child_path):
+                if existfile(child_path, filename, recursive):
                     return True
-    #若程序执行到此，说明没有搜索到指定文件
+
     return False
 
-#主函数
-#args: 输入参数
+
+# args: user input arguments
 def main(args):
-    """main function"""
-    # 引入 PyYAML 模块
-    import yaml
-    # 检查配置文件是否存在
+    """Main function"""
+
+    # vaild the configuration file
     if not os.path.exists(args.cfg):
-        print("Error! Can't find config file: " + args.cfg + ", use -cfg <config> input it!")
+        print("Error! Can't find config file: %s!" %args.cfg, file=sys.stderr)
         return 1
-    #加载配置文件
-    cfgfile = open(args.cfg)
-    sites = yaml.load(cfgfile)
-    cfgfile.close()
-    srcdir, doy, year = args.dir, args.doy, args.yr
-    #将年积日补齐为3位
+
+    src_dir, doy, year = args.dir, args.doy, args.yr
+    # laod configuration file
+    with open(args.cfg) as cfgfile:
+        sites = yaml.load(cfgfile)
+    # get 3 digit doy
     doy = doy.rjust(3, '0')
-    #验证输入的年
+    # valid year
     if not(year.isdigit() and (len(year) == 2 or len(year) == 4)):
-        print("Error! year of data isn't vaild!")
+        print("Error! year of data isn't vaild!", file=sys.stderr)
         return 1
-    #验证输入的年积日
+    # valid doy
     if not doy.isdigit() or int(doy) > 366 :
-        print("Error! day of year isn't vaild!")
+        print("Error! day of year isn't vaild!", file=sys.stderr)
         return 1
-    #输出提示信息
-    print('----------------- input params ---------------')
-    print('source dir: ' + srcdir)
-    print("data's year: " + year)
-    print('day of year: ' + doy)
-    print('config file: ' + args.cfg)
-    print('----------------------------------------------', end='\n\n')
-    #保存找不到的站点
+
+    print('---------------------- input params ----------------------')
+    print('source dir: %s' %src_dir)
+    print('year of data: %s' %year)
+    print('day of year: %s' %doy)
+    print('config file: %s' %args.cfg)
+    print('----------------------------------------------------------\n')
+
     messingsites = []
     for site in sites:
-        #检查的文件名
+        # get observation file name
         ofilename = site.lower() + doy + '0.' + year[-2:] + 'o'
         dfilename = site.lower() + doy + '0.' + year[-2:] + 'd'        
-        #如果检查的文件不存在，则将站点保存到 messingsites
-        if not (existfile(srcdir, ofilename, args.recursive) or \
-                existfile(srcdir, dfilename, args.recursive)):
+        #add messing site into messingsites
+        if not (existfile(src_dir, ofilename, args.recursive) or
+                existfile(src_dir, dfilename, args.recursive)):
             messingsites.append(site)
-    #若存在找不到的站点，将站点名输出
+
     if len(messingsites) > 0:
-        print('sites not found in ' + year + ' ' + doy + ': ' + ', '.join(messingsites) + '.')
+        print('sites not found in %s %s: %s.' %(year, doy, ', '.join(messingsites)))
 
     return 0
 
-def init_args():
-    """Initilize function"""
-    #引入 argparse 模块用于解析用户输入
-    import argparse
-    #创建解析器
-    parser = argparse.ArgumentParser(description=\
-                                    'check if obs file exist by a sites list in YAML.')
-    #添加所需参数信息
-    parser.add_argument('-r', '--recursive', action='store_true'\
-                        , help='search file in child folder')
-    parser.add_argument('-v', '--version', action='version'\
-                        , version='sitecheck.py 0.1.3')
-    parser.add_argument('-dir', metavar='<input_dir>', default='./'\
-                        , help='input dir [default: current]')
-    parser.add_argument('-cfg', metavar='<config>', default='_sites.yml'\
-                        , help='configuration YAML file [default: ./_sites.yml]')
-    parser.add_argument('-yr', metavar='<year>', required=True\
-                        , help='data observation year [required]')
-    parser.add_argument('-doy', metavar='<doy>', required=True\
-                        , help='observation day of year [required]')
 
-    #运行主程序方法
+def init_args():
+    """Initilize function, parse user input"""
+
+    # initilize a argument parser
+    parser = argparse.ArgumentParser(
+        description='check if obs file exist by a sites list in YAML.')
+    # add arguments
+    parser.add_argument('-v', '--version', action='version',
+                        version='sitecheck.py 0.1.4')
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='search file in subfolders')
+    parser.add_argument('-dir', metavar='<input_dir>', default='.',
+                        help='input dir [default: current]')
+    parser.add_argument('-cfg', metavar='<config>', default='_sites.yml',
+                        help='configuration YAML file [default: _sites.yml]')
+    parser.add_argument('-yr', metavar='<year>', required=True,
+                        help='data observation year [required]')
+    parser.add_argument('-doy', metavar='<doy>', required=True,
+                        help='observation day of year [required]')
+
     return main(parser.parse_args())
+
 
 if __name__ == '__main__':
     init_args()
