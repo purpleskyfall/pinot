@@ -8,9 +8,9 @@
 import os
 import sys
 import glob
-import yaml
 import shutil
 import argparse
+import yaml
 
 
 # dir_path: directory path

@@ -10,8 +10,8 @@ import os
 import re
 import sys
 import glob
-import yaml
 import argparse
+import yaml
 
 # test if a file is RINEX observation file or Compact RINEX
 RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.*\.\d{2}[od]$', re.I)
@@ -63,8 +63,8 @@ def compareinfo(info, file, threshold, out_type):
                             differences.append(item + ' in obs file: ' + ', '.join(fileposis))
                         else:
                             message = (file.center(40, ' ') + item.center(14, ' ') +
-                                        (','.join(cfgposis)).center(46, ' ') +
-                                        (','.join(fileposis)).center(46, ' '))
+                                       (','.join(cfgposis)).center(46, ' ') +
+                                       (','.join(fileposis)).center(46, ' '))
                             differences.append(message)
                         break
                 break
@@ -74,9 +74,9 @@ def compareinfo(info, file, threshold, out_type):
                     differences.append(item + ' in cfg file: ' + info[item])
                     differences.append(item + ' in obs file: ' + fileinfostr.strip())
                 else:
-                    message = (filename.center(16, ' ') + item.center(14, ' ') + 
-                                info[item].center(46, ' ') +
-                                fileinfostr.strip().center(46, ' '))
+                    message = (filename.center(16, ' ') + item.center(14, ' ') +
+                               info[item].center(46, ' ') +
+                               fileinfostr.strip().center(46, ' '))
                     differences.append(message)
                 break
     # output differences
@@ -87,7 +87,7 @@ def compareinfo(info, file, threshold, out_type):
 
 
 # src_dir: source directory, glob_str: glob string,
-# sitesinfo: sitesinfo in configuration file, 
+# sitesinfo: sitesinfo in configuration file,
 # threshold: threshold of position difference
 # out_type: list or table, recursive: search file recursively
 def checksite(glob_str, src_dir, sitesinfo, out_type, threshold, recursive):
@@ -129,7 +129,7 @@ def main(args):
         sitesinfo = yaml.load(cfgfile)
 
     src_dir, glob_str, out_type, threshold = args.dir, args.glob, args.out, args.thd
-    
+
     print('---------------------- input params ----------------------')
     print('source dirs: %s' %src_dir)
     print('file mode: %s' %glob_str)
@@ -139,14 +139,14 @@ def main(args):
     # if out_type is table, print a table header first
     if out_type == 'table' or out_type == 't':
         print('\n' + 'file'.center(16, ' ') + 'type'.center(14, ' ')
-                + 'cfgfile'.center(46, ' ') + 'obsfile'.center(46, ' '))
-    
+              + 'cfgfile'.center(46, ' ') + 'obsfile'.center(46, ' '))
+
     for directory in glob.glob(src_dir):
         checksite(glob_str, directory, sitesinfo, out_type, threshold, args.recursive)
-    
+
     if len(MISSINGSITES) > 0:
         print('\nsites not found in cfg file: %s.' %', '.join(MISSINGSITES))
-    
+
     return 0
 
 

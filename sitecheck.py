@@ -7,8 +7,8 @@
 
 import os
 import sys
-import yaml
 import argparse
+import yaml
 
 
 # dir_path: directory path, filename: name of file,
@@ -50,7 +50,7 @@ def main(args):
         print("Error! year of data isn't vaild!", file=sys.stderr)
         return 1
     # valid doy
-    if not doy.isdigit() or int(doy) > 366 :
+    if not doy.isdigit() or int(doy) > 366:
         print("Error! day of year isn't vaild!", file=sys.stderr)
         return 1
 
@@ -65,7 +65,7 @@ def main(args):
     for site in sites:
         # get observation file name
         ofilename = site.lower() + doy + '0.' + year[-2:] + 'o'
-        dfilename = site.lower() + doy + '0.' + year[-2:] + 'd'        
+        dfilename = site.lower() + doy + '0.' + year[-2:] + 'd'
         #add messing site into messingsites
         if not (existfile(src_dir, ofilename, args.recursive) or
                 existfile(src_dir, dfilename, args.recursive)):

@@ -9,9 +9,9 @@ import os
 import re
 import sys
 import glob
-import yaml
 import shutil
 import argparse
+import yaml
 
 # test if a filename is RINEX
 RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.+\.\d{2}[a-z]$', re.I)

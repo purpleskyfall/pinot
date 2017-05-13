@@ -10,9 +10,9 @@ import re
 import sys
 import glob
 import time
-import yaml
 import argparse
 import threading
+import yaml
 
 # test if a filename is RINEX
 RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.*\.\d{2}[o]$', re.I)
@@ -128,7 +128,7 @@ def process(glob_str, src_dir, out_dir, sitesinfo, recursive):
         info = getinfo(filename[0:4], sitesinfo)
         params = getparams(info)
         commands.append({'file': file, 'params': params, 'output': out_dir})
-    
+
     # run commands async
     runtaskasync(commands[::-1])
     # process subfolders if --recursive is setted
@@ -147,14 +147,14 @@ def main(args):
     if not os.path.exists(args.cfg):
         print("Error! Can't find config file: %s" %args.cfg, file=sys.stderr)
         return 1
-    
+
     # load configuration file
     with open(args.cfg) as cfgfile:
         sitesinfo = yaml.load(cfgfile)
 
     src_dir, glob_str, out_dir = args.dir, args.glob, args.out
     createdir(out_dir)
-    
+
     print('---------------------- input params ------------------------')
     print('source dirs: %s' %src_dir)
     print('output dir: %s' %out_dir)
@@ -164,10 +164,10 @@ def main(args):
 
     # save start time
     start = time.clock()
-    
+
     for directory in glob.glob(src_dir):
         process(glob_str, directory, out_dir, sitesinfo, args.recursive)
-    
+
     # calculate running time
     end = time.clock()
     print('\nuse seconds: %.5f' %(end - start))
