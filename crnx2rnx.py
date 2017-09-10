@@ -1,96 +1,102 @@
-#coding=UTF-8
-#creater: Jon Jiang
-#datetime: 2017-03-26
-#Python version: 3.4.3
+#!/usr/bin/env python3
+# coding=utf-8
+"""Convert GSI Compact RINEX into Standard RINEX,
+using concurent.future.
 
-"""Convert GSI Compact RINEX into Standard RINEX"""
+The convert function rely on RNXCMP software. Check if you have
+installed RNXCMP by typing `crx2rnx -h` in cmd.
 
-import os
-import re
-import glob
+:author: Jon Jiang
+:email: jiangyingming@live.com
+"""
+from concurrent import futures
 import argparse
+import glob
+import itertools
+import os
+import subprocess
 
-# test if a filename is Compact RINEX
-CRINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.+\.\d{2}d$', re.I)
+import tqdm
 
-
-# dir_path: directory path
-def createdir(dir_path):
-    """Create new directory if not exist"""
-
-    if not os.path.exists(dir_path):
-        print('create directory: %s' %dir_path)
-        os.makedirs(dir_path)
+MAX_THREADING = max(6, os.cpu_count())
 
 
-# src_dir: source directory, out_dir: output directory,
-# glob_str: glob string, keep: keep input files,
-# recursive: search file recursively
-def crx2rnx(src_dir, out_dir, glob_str, keep, recursive):
-    """Convert Compact RINEX to Standard RINEX by crx2rnx"""
+def crx2rnx(src_file, out_dir, keep):
+    """Convert compact RINEX file to standard RINEX."""
+    filename = os.path.basename(src_file)
+    if filename.lower().endswith('crx'):
+        dst_file = os.path.join(out_dir, filename[0:-3]+'rnx')
+    else:
+        dst_file = os.path.join(out_dir, filename[0:-1]+'o')
+    # run crx2rnx, redirect standard RINEX stdout into destination file
+    # and ignore the stderr.
+    args = 'crx2rnx', '-', src_file
+    with open(dst_file, 'w') as dst_writer:
+        status = subprocess.call(args, stdout=dst_writer, stderr=subprocess.DEVNULL)
+    # check exit status of crx2rnx: {0: success, 1: error, 2: warning}
+    if status == 1:
+        # if run crx2rnx failed, remove dest file and return filename
+        os.remove(dst_file)
+        return filename
+    # remove source file if keep is False when successful
+    if not keep:
+        os.remove(src_file)
 
-    for file in glob.glob(os.path.join(src_dir, glob_str)):
-        crx_name = os.path.basename(file)
-        # skip not matched filename
-        if not CRINEXREG.match(crx_name):
-            continue
-        # output filename, using casing of the last letter in crx_name
-        rnx_name = crx_name[:-1] + ('O' if str.isupper(crx_name[-1]) else 'o')
-        rnx_path = os.path.join(out_dir, rnx_name)
-        # run crx2rnx
-        print('convert: %s ......' %file)
-        command = 'crx2rnx - ' + file + ' > ' + rnx_path
-        status = os.system(command)
-        # delete source file if --keep is not setted
-        if not keep and status == 0:
-            os.remove(file)
-
-    # process subfolders if --recursive is setted
-    if recursive:
-        for child in os.listdir(src_dir):
-            child_path = os.path.join(src_dir, child)
-            if os.path.isdir(child_path):
-                crx2rnx(child_path, out_dir, glob_str, keep, recursive)
+    return
 
 
-# args: user input arguments
+def parallel_run(function, argvs):
+    """Parallel run function using argvs, display a process bar."""
+    with futures.ThreadPoolExecutor(max_workers=MAX_THREADING) as executor:
+        todo_list = [executor.submit(function, *argv) for argv in argvs]
+        task_iter = futures.as_completed(todo_list)
+        failed_files = []
+        for future in tqdm.tqdm(task_iter, total=len(todo_list), unit='file'):
+            # return None means task is success
+            res = future.result()
+            if res:
+                failed_files.append(res)
+
+        return failed_files
+
+
 def main(args):
-    """Main function"""
-
-    src_dir, out_dir, glob_str = args.dir, args.out, args.glob
-    createdir(out_dir)
-
-    print('---------------------- input params ----------------------')
-    print('source dirs: %s' %src_dir)
-    print('output dir: %s' %out_dir)
-    print('file mode: %s' %glob_str)
-    print('----------------------------------------------------------\n')
-
-    for directory in glob.glob(src_dir):
-        crx2rnx(directory, out_dir, glob_str, args.keep, args.recursive)
-
-    return 0
+    """Main function."""
+    globstrs, out_dir = args.files, args.out
+    keep_src, recursive = args.keep, args.recursive
+    # create output directory
+    os.makedirs(out_dir, exist_ok=True)
+    # collect input globstrs into a glob list
+    globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
+    # make input args for crx2rnx function
+    conv_args = ((src, out_dir, keep_src) for src in itertools.chain(*globs))
+    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    if not keep_src:
+        print('Delete source file when complete')
+    # start parallel task, get a file name list of convert failed.
+    failed = parallel_run(crx2rnx, conv_args)
+    if failed:
+        print('\nConvert failed filename: {}'.format(', '.join(failed)))
+    else:
+        print('\nAll convert tasks are finished!')
 
 
 def init_args():
     """Initilize function, parse user input"""
-
     # initilize a argument parser
     parser = argparse.ArgumentParser(
         description='Convert GSI Compact RINEX into Standard RINEX.')
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='crnx2rnx.py 0.1.1')
+                        version='%(prog)s 0.2.0')
     parser.add_argument('-k', '--keep', action='store_true',
-                        help='keep original file in input dir')
+                        help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file in subfolders')
-    parser.add_argument('-dir', metavar='<input_dir>', default='.',
-                        help='input dir mode [default: current]')
-    parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][Dd]',
-                        help='filename search mode [default: *.[0-9][0-9][Dd]')
-    parser.add_argument('-out', metavar='<output_dir>', default='rinex',
-                        help='output dir, [default: rinex in current]')
+                        help='search file recursively')
+    parser.add_argument('-out', metavar='<directory>', default='rinex',
+                        help='output directory [default: rinex in current]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
 
     return main(parser.parse_args())
 
