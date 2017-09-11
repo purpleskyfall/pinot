@@ -33,7 +33,7 @@ Pinot 程序包目前包含以下脚本：
 - unificate.py
 - up2lower.py
 
-## 以来模块
+## 依赖模块
 部分脚本依赖于 [PyYAML][4] 或 [tqdm][5] 模块，PyYAML 是一个解析 YAML 数据的程序包，而 tqdm 是一个在命令行界面显示进度条的软件包。使用以下命令安装 tqdm 模块：
 
 ```
