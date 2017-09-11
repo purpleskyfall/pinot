@@ -31,6 +31,7 @@ def get_info(site, sitesinfo):
     site or a item not found in sitesinfo.
 
     Example:
+
     >>> default = {'interval': 30, 'observer': 'Jon'}
     >>> special = {'antenna': 'TRM59900.00     SCIS', 'interval': 15}
     >>> sitesinfo = {'all': default, 'bjfs': special}
@@ -60,8 +61,8 @@ def arg_wraper(key, value):
     >>> arg_wraper('obs_type', ['C1', 'P1', 'L1'])
     ('-O.obs', 'C1,P1,L1')
 
-    >>> arg_wraper('position', '2148744.841  4426642.960  4044657.852')
-    ('-O.px', '2148744.841  4426642.960  4044657.852')
+    >>> arg_wraper('antenna', 'TRM59900.00     SCIS')
+    ('-O.at', '"TRM59900.00     SCIS"')
 
     >>> arg_wraper('interval', 30)
     ('-O.dec', '30')
