@@ -1,107 +1,78 @@
-#coding=UTF-8
-#creater: Jon Jiang
-#datetime: 2016-12-20
-#Python version: 3.4
+#!/usr/bin/env python3
+# coding=utf-8
+"""Rename filename, lower to upper.
 
-"""Rename filename, lower to upper"""
-
-import os
-import sys
-import glob
-import shutil
+:author: Jon Jiang
+:email: jiangyingming@live.com
+"""
 import argparse
+import glob
+import itertools
+import os
+import shutil
+import sys
 
 
-#dir_path: directory path
-def createdir(dir_path):
-    """Create new directory if not exist"""
-
-    if not os.path.exists(dir_path):
-        print('create directory: %s' %dir_path)
-        os.makedirs(dir_path)
-
-
-# src_dir: source directory, out_dir: output directory,
-# glob_str: glob string, keep: keep input files,
-# recursive: search file recursively
-def low2upper(src_dir, out_dir, glob_str, keep, recursive):
-    """Rename file, lower to upper"""
-
-    # if the out_dir is None, rename file in original folder
+def low2upper(src_file, out_dir, keep):
+    """Rename filename, lower to upper:
+    If out_dir is None, rename original file;
+    If out_dir is not None and keep is true, rename using copy;
+    If out_dir is not None and keep is false, rename using move.
+    """
+    src_dir, filename = os.path.split(src_file)
     if out_dir is None:
-        for file in glob.glob(os.path.join(src_dir, glob_str)):
-            filedir, filename = os.path.split(file)
-            print('rename file: %s' %file)
-            shutil.move(file, os.path.join(filedir, filename.upper()))
-
-    # if the out_dir is not None and --keep is setted, copy and rename
-    elif keep:
-        for file in glob.glob(os.path.join(src_dir, glob_str)):
-            filename = os.path.basename(file)
-            print('rename file: %s' %file)
-            shutil.copy(file, os.path.join(out_dir, filename.upper()))
-
-    # if the out_dir is not None and --keep is not setted, move and rename
+        dst_file = os.path.join(src_dir, filename.upper())
     else:
-        for file in glob.glob(os.path.join(src_dir, glob_str)):
-            filename = os.path.basename(file)
-            print('rename file: %s' %file)
-            shutil.move(file, os.path.join(out_dir, filename.upper()))
+        dst_file = os.path.join(out_dir, filename.upper())
 
-    # process subfolders if --recursive is setted
-    if recursive:
-        for child in os.listdir(src_dir):
-            child_path = os.path.join(src_dir, child)
-            if os.path.isdir(child_path):
-                low2upper(child_path, out_dir, glob_str, keep, recursive)
+    if keep:
+        shutil.copy2(src_file, dst_file)
+    else:
+        shutil.move(src_file, dst_file)
 
 
-# args: user input arguments
 def main(args):
-    """Main function"""
-
-    src_dir, out_dir, glob_str = args.dir, args.out, args.glob
-
+    """Main function."""
+    globstrs, out_dir = args.files, args.out
+    keep, recursive = args.keep, args.recursive
     # if the out_dir is None and --keep is setted, process as an error
     if args.keep and out_dir is None:
-        print('Error! blank output_dir is conflict with --keep.', file=sys.stderr)
+        err_message = 'Error! Blank output directory is conflict with --keep.'
+        print(err_message, file=sys.stderr)
         return 1
-
+    # start process
     if out_dir is not None:
-        createdir(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
+    # collect input globstrs into a glob list
+    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
+    count = 0
+    for src_file in itertools.chain(*globs):
+        low2upper(src_file, out_dir, keep)
+        count += 1
 
-    print('---------------------- input params ----------------------')
-    print('source dir: %s' %src_dir)
-    print('output dir: %s' %out_dir)
-    print('file mode: %s' %glob_str)
-    print('----------------------------------------------------------\n')
-
-    for directory in glob.glob(src_dir):
-        low2upper(directory, out_dir, glob_str, args.keep, args.recursive)
+    print('{} files have been processed.'.format(count))
 
     return 0
 
 
 def init_args():
-    """Initilize function, parse user input"""
-
+    """Initilize function, parse user input."""
     # initilize a argument parser
     parser = argparse.ArgumentParser(
-        description="Rename filesname, lower to upper.")
-
+        description="Rename filename, lower to upper."
+    )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='low2upper.py 0.1.7')
+                        version='%(prog) 0.2.0')
     parser.add_argument('-k', '--keep', action='store_true',
-                        help='keep original file in input dir')
+                        help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file in subfolders')
-    parser.add_argument('-dir', metavar='<input_dir>', default='.',
-                        help='input dir mode [default: current]')
-    parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][od]*',
-                        help='filename search mode [default: *.[0-9][0-9][od]*')
-    parser.add_argument('-out', metavar='<output_dir>',
-                        help='output dir, [default: self dir]')
+                        help='search file recursively')
+    parser.add_argument('-out', metavar='<directory>', default=None,
+                        help='output directory, [default: original folder]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
 
     return main(parser.parse_args())
 
