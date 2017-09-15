@@ -1,123 +1,91 @@
-#coding=UTF-8
-#creater: Jon Jiang
-#datetime: 2017-01-03
-#Python version: 3.4
+#!/usr/bin/env python3
+# coding=utf-8
+"""Rename GNSS RINEX file, using a YAML site map configuration file.
 
-"""Rename GNSS file by a YAML configuration"""
-
-import os
-import re
-import sys
-import glob
-import shutil
+:author: Jon Jiang
+:email: jiangyingming@live.com
+"""
 import argparse
+import glob
+import itertools
+import os
+import shutil
+
 import yaml
 
-# test if a filename is RINEX
-RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.+\.\d{2}[a-z]$', re.I)
+
+def rename_site(src_file, out_dir, sitemap, keep_src):
+    """Rename src_file output to out_dir using a sitemap:
+    1. If site isn't in sitemap, do nothing and return site name;
+    2. If out_dir is None, rename original file;
+    3. If out_dir is not None and keep_src is true, rename using copy;
+    4. If out_dir is not None and keep_src is false, rename using move.
+    """
+    src_dir, filename = os.path.split(src_file)
+    site = filename[0:4]
+    site_key = site.lower()
+    # if site isn't in sitemap
+    if site_key not in sitemap:
+        return site_key
+    # get dst file name
+    newsite = sitemap[site_key]
+    dst_name = (newsite if site.islower() else newsite.upper()) + filename[4:]
+    # get dst file path
+    if out_dir is None:
+        dst_file = os.path.join(src_dir, dst_name)
+    else:
+        dst_file = os.path.join(out_dir, dst_name)
+    # start file rename
+    print('{} => {}'.format(src_file, dst_file))
+    if keep_src:
+        shutil.copy2(src_file, dst_file)
+    else:
+        shutil.move(src_file, dst_file)
 
 
-#dir_path: directory path
-def createdir(dir_path):
-    """Create new directory if not exist"""
-
-    if not os.path.exists(dir_path):
-        print('create directory: %s' %dir_path)
-        os.makedirs(dir_path)
-
-
-# src_dir: source directory, out_dir: output directory,
-# glob_str: glob string, keep: keep input files,
-# sitemap: map of old site and new site name
-# recursive: search file recursively
-def rename(src_dir, glob_str, out_dir, sitemap, keep, recursive):
-    """Rename files in src_dir by sitemap"""
-
-    for file in glob.glob(os.path.join(src_dir, glob_str)):
-        # get filename and site
-        filename = os.path.basename(file)
-        site = filename[:4].lower()
-        # if file is not match RINEXREG or site is not in sitemap, skip it
-        if not RINEXREG.match(filename) or site not in sitemap:
-            continue
-
-        # new site and filename
-        newsite = sitemap[site]
-        newname = newsite + filename[4:]
-
-        # if out_dir is None, output to original folder
-        if out_dir is None:
-            filedir = os.path.dirname(file)
-            newfile = os.path.join(filedir, newname)
-        else:
-            newfile = os.path.join(out_dir, newname)
-        print('rename: ' + file + ' => ' + newfile)
-
-        if keep:
-            shutil.copy(file, newfile)
-        else:
-            shutil.move(file, newfile)
-
-    # process subfolders if --recursive is setted
-    if recursive:
-        for child in os.listdir(src_dir):
-            child_path = os.path.join(src_dir, child)
-            if os.path.isdir(child_path):
-                rename(child_path, glob_str, out_dir, sitemap, keep, recursive)
-
-
-# args: user input arguments
 def main(args):
-    """Main function"""
-
-    if not os.path.exists(args.cfg):
-        print('Error! configuration file not exit!', file=sys.stderr)
-        return 1
-
-    src_dir, out_dir, glob_str = args.dir, args.out, args.glob
-
-    # load configuration file
-    with open(args.cfg) as cfgfile:
-        sitemap = yaml.load(cfgfile)
-
+    """Main function."""
+    globstrs, out_dir, sitemap = args.files, args.out, yaml.load(args.cfg)
+    keep_src, recursive = args.keep, args.recursive
+    # make output directory if out_dir is set
     if out_dir is not None:
-        createdir(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
+    # collect input globstrs into a glob list
+    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
+    missing = set()
+    for src_file in itertools.chain(*globs):
+        res = rename_site(src_file, out_dir, sitemap, keep_src)
+        # if return is not None, means site not found in sitemap
+        if res is not None:
+            missing.add(res)
 
-    print('---------------------- input params ----------------------')
-    print('source dir: %s' %src_dir)
-    print('output dir: %s' %out_dir)
-    print('file mode: %s' %glob_str)
-    print('config file: %s' %args.cfg)
-    print('----------------------------------------------------------', end='\n\n')
-
-    for directory in glob.glob(src_dir):
-        rename(directory, glob_str, out_dir, sitemap, args.keep, args.recursive)
+    if missing:
+        print('Sites not found in sitemap: {}'.format(', '.join(missing)))
 
     return 0
 
 
 def init_args():
     """Initilize function, parse user input"""
-
     # initilize a argument parser
     parser = argparse.ArgumentParser(
-        description='Rename GNSS file by a YAML configuration.')
-
+        description='Rename GNSS file using a YAML configuration.'
+    )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='renamesite.py 0.1.1')
+                        version='%(prog)s 0.2.0')
     parser.add_argument('-k', '--keep', action='store_true',
                         help='keep original file in input_dir')
     parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file in subfolders')
-    parser.add_argument('-dir', metavar='<input_dir>', default='.',
-                        help='input dir mode [default: current]')
-    parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9]?*',
-                        help='filename search mode [default: *.[0-9][0-9]?*]')
+                        help='search file recursively')
     parser.add_argument('-cfg', metavar='<config>', default='_sitemap.yml',
+                        type=argparse.FileType('r'),
                         help='configuration YAML file [default: _sitemap.yml]')
-    parser.add_argument('-out', metavar='<output_dir>',
-                        help='output dir [default: self dir]')
+    parser.add_argument('-out', metavar='<directory>', default=None,
+                        help='output directory [default: original folder]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
 
     return main(parser.parse_args())
 
