@@ -139,6 +139,8 @@ def main(args):
     # make input args for teqc function
     teqc_args = ((src, make_args(src, infos), out_dir, keep_src) for src in files)
     print('Start processing: {} ...'.format(', '.join(globstrs)))
+    if not keep_src:
+        print('Delete source files when complete')
     # start parallel task, get a filename list of unificate failed.
     failed = parallel_run(teqc, teqc_args)
     if failed:

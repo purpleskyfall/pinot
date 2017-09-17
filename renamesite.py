@@ -27,10 +27,10 @@ def rename_site(src_file, out_dir, sitemap, keep_src):
     # if site isn't in sitemap
     if site_key not in sitemap:
         return site_key
-    # get dst file name
+    # get destination file name
     newsite = sitemap[site_key]
     dst_name = (newsite if site.islower() else newsite.upper()) + filename[4:]
-    # get dst file path
+    # get destination file path
     if out_dir is None:
         dst_file = os.path.join(src_dir, dst_name)
     else:
@@ -51,8 +51,11 @@ def main(args):
     if out_dir is not None:
         os.makedirs(out_dir, exist_ok=True)
     # collect input globstrs into a glob list
-    print('Start processing: {} ...'.format(', '.join(globstrs)))
     globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
+    # start process
+    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    if not keep_src:
+        print('Delete source files when complete')
     missing = set()
     for src_file in itertools.chain(*globs):
         res = rename_site(src_file, out_dir, sitemap, keep_src)
@@ -76,7 +79,7 @@ def init_args():
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s 0.2.0')
     parser.add_argument('-k', '--keep', action='store_true',
-                        help='keep original file in input_dir')
+                        help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-cfg', metavar='<config>', default='_sitemap.yml',

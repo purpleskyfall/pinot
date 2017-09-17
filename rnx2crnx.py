@@ -72,7 +72,7 @@ def main(args):
     conv_args = ((src, out_dir, keep_src) for src in itertools.chain(*globs))
     print('Start processing: {} ...'.format(', '.join(globstrs)))
     if not keep_src:
-        print('Delete source file when complete')
+        print('Delete source files when complete')
     # start parallel task, get a file name list of convert failed.
     failed = parallel_run(rnx2crx, conv_args)
     if failed:

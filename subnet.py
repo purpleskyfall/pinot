@@ -1,99 +1,106 @@
-#coding=UTF-8
-#create date: 2016/12/2
-#creater: Jon Jiang
-#Python version: 3.4
+#!/usr/bin/env python3
+# coding=utf-8
+"""Order RINEX observation files using a subnet configuration.
 
-"""Create the subnets by a configuration file."""
+This script will create directories using subnet name then copy or move
+RINEX observation files into the subnet folders.
 
-import os
-import sys
-import glob
-import shutil
+:author: Jon Jiang
+:email: jiangyingming@live.com
+"""
 import argparse
+import glob
+import itertools
+import os
+import shutil
+
 import yaml
 
 
-# dir_path: directory path
-def createdir(dir_path):
-    """Create new directory if not exist"""
+def which_nets(src_file, subnets):
+    """Locate which nets a source file belong, return a list.
 
-    if not os.path.exists(dir_path):
-        print('create directory: %s' %dir_path)
-        os.makedirs(dir_path)
+    Example:
+
+    >>> nets = {'net1': {'algo', 'shao'}, 'net2': {'algo', 'warn'}}
+    >>> which_nets('wuhn0420.17d', nets)
+    []
+    >>> which_nets('WARN00DEU_R_20170420000_01D_30S_MO.crx', nets)
+    ['net2']
+    >>> sorted(which_nets('algo0420.17o', nets))
+    ['net1', 'net2']
+    """
+    filename = os.path.basename(src_file)
+    site = filename[0:4].lower()
+    return [net for net, sites in subnets.items() if site in sites]
 
 
-# site: site name, src_dir: source directory,
-# out_dir: output directory, glob_str: glob string,
-# recursive: search file recursively
-def copysite(site, glob_str, src_dir, out_dir, recursive):
-    """Copy RINEX file to subnet folders"""
+def order_file(src_file, dst_dirs, keep_src):
+    """Copy source file into destination directories:
+    If keep_src is False, remove source file when complete.
+    """
+    for dst_dir in dst_dirs:
+        print('{} => {}'.format(src_file, dst_dir))
+        shutil.copy2(src_file, dst_dir)
 
-    for file in glob.glob(os.path.join(src_dir, glob_str)):
-        filename = os.path.basename(file)
-        if site.upper() == filename[0:4].upper():
-            print('copy: %s' %file)
-            shutil.copy(file, out_dir)
+    if not keep_src:
+        os.remove(src_file)
 
-    # process subfolders if --recursive is setted
-    if recursive:
-        for child in os.listdir(src_dir):
-            child_path = os.path.join(src_dir, child)
-            if os.path.isdir(child_path):
-                copysite(site, glob_str, child_path, out_dir, recursive)
 
-# args: user input arguments
 def main(args):
-    """Main function"""
+    """Main function."""
+    globstrs, out_dir, config = args.files, args.out, yaml.load(args.cfg)
+    keep_src, recursive = args.keep, args.recursive
+    # convert sites list into set
+    nets = {net: set(sites) for net, sites in config.items()}
+    net_dirs = {net: os.path.join(out_dir, net) for net in nets}
+    # create folder for every subnet
+    for subdir in net_dirs.values():
+        os.makedirs(subdir, exist_ok=True)
+    # collect input globstrs into a glob list
+    globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
+    # start process
+    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    if not keep_src:
+        print('Delete source files when complete')
+    missing = set()
+    for src_file in itertools.chain(*globs):
+        belong = which_nets(src_file, nets)
+        # if couldn't found a site in any subnets, log it
+        if not belong:
+            missing.add(os.path.basename(src_file)[0:4].lower())
+            continue
+        # get all destination directories and copy/move in
+        dst_dirs = [net_dirs[net] for net in belong]
+        order_file(src_file, dst_dirs, keep_src)
 
-    # check if the configuration file exist
-    if not os.path.exists(args.cfg):
-        print("Error! Can't find config file: %s!" %args.cfg, file=sys.stderr)
-        return 1
-
-    with open(args.cfg) as cfgfile:
-        subnets = yaml.load(cfgfile)
-
-    src_dir, glob_str, out_dir = args.dir, args.glob, args.out
-    createdir(out_dir)
-
-    print('---------------------- input params ----------------------')
-    print('source dir: %s' %src_dir)
-    print('output dir: %s' %out_dir)
-    print('file mode: %s' %glob_str)
-    print('config file: %s' %args.cfg)
-    print('-------------------------------------------------------------------------------------\n')
-
-    for net in subnets:
-        print('process subnet: %s ......' %net)
-        netdir = os.path.join(out_dir, net)
-        createdir(netdir)
-        for site in subnets[net]:
-            for srcdir in glob.glob(src_dir):
-                copysite(site, glob_str, srcdir, netdir, args.recursive)
+    if missing:
+        message = 'Sites not belong to any networks: {}'
+        print(message.format(', '.join(missing)))
 
     return 0
 
 
-#脚本初始化方法，解析用户的输入参数
 def init_args():
     """Initilize function, parse user input"""
-
     # initilize a argument parser
     parser = argparse.ArgumentParser(
-        description='Create the subnets by a configuration file.')
+        description='Order RINEX files using a YAML subnet configuration.'
+    )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='subnet.py 0.3.5')
+                        version='%(prog)s 0.4.0')
     parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file in subfolders')
-    parser.add_argument('-dir', metavar='<input_dir>', default='.',
-                        help='input dir mode [default: current]')
-    parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9][oOdD]*',
-                        help='mode is filename search mode [default: *.[0-9][0-9][oOdD]*')
-    parser.add_argument('-out', metavar='<output>', default='subnets',
-                        help='output dir [default: subnets in current]')
+                        help='search file recursively')
+    parser.add_argument('-k', '--keep', action='store_true',
+                        help='keep original file in input_dir')
     parser.add_argument('-cfg', metavar='<config>', default='_subnet.yml',
-                        help='configuration YAML file [default: ./subnet.yml]')
+                        type=argparse.FileType('r'),
+                        help='configuration file [default: ./subnet.yml]')
+    parser.add_argument('-out', metavar='<directory>', default='subnets',
+                        help='output directory [default: subnets in current]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
 
     return main(parser.parse_args())
 

@@ -1,105 +1,143 @@
-#coding=UTF-8
-#creater: Jon Jiang
-#datetime: 2017-01-03
-#Python version: 3.4
+#!/usr/bin/env python3
+# coding=utf-8
+"""Order RINEX files to suit IGS style organization.
 
-"""Order rinex files to suit IGS style."""
+An example, order files observed at 2017:
 
-import os
-import re
-import glob
-import shutil
+. 2017/
+    ...
+    |-- 042/
+        |-- 17d
+            |-- aggo0420.17d
+            |-- WARN00DEU_R_20170420000_01D_30S_MO.crx
+            ...
+        |-- 17m
+            |-- daej0420.17m
+            |-- DAVS00ATA_R_20170420000_01D_30S_MM.rnx
+        |-- 17n
+            |-- brdc0420.17n
+            |-- ALGO00CAN_R_20170420000_01D_30S_MN.rnx
+            ...
+        |-- 17o
+            |-- bjfs0420.17o
+            |-- SHAO00CHN_R_20170420000_01D_30S_MO.rnx
+            ...
+        ...
+    ...
+
+:author: Jon Jiang
+:email: jiangyingming@live.com
+"""
 import argparse
-
-# test if a filename is RINEX
-RINEXREG = re.compile(r'^[a-z0-9]{4}\d{3}.+\.\d{2}[a-z]$', re.I)
-
-# dirpath: directory path
-def createdir(dir_path):
-    """Create new directory if not exist"""
-
-    if not os.path.exists(dir_path):
-        print('create directory: %s' %dir_path)
-        os.makedirs(dir_path)
+import glob
+import itertools
+import os
+import shutil
 
 
-# src_dir: source directory, out_dir: output directory,
-# glob_str: glob string, keep: keep input files,
-# recursive: search file recursively
-def orderdir(src_dir, glob_str, out_dir, keep, recursive):
-    """Order GNSS files into IGS style"""
+def which_kind(filename):
+    """Return which kind a source file is, the kind is a 2-digit year
+    concat one of a kind char in: d, m, n, o.
 
-    for file in glob.glob(os.path.join(src_dir, glob_str)):
-        filename = os.path.basename(file)
-        # if file is not match RINEXREG, skip it
-        if not RINEXREG.match(filename):
-            continue
-        # get year, doy file type from filename
-        year, doy, filetype = filename[-3:-1], filename[4:7], filename[-3:]
-        year = '20' + year if int(year) < 80 else '19' + year
-        # calculate filepath
-        yearpath = os.path.join(out_dir, year)
-        doypath = os.path.join(yearpath, doy)
-        typepath = os.path.join(doypath, filetype)
-        # create directory
-        createdir(yearpath)
-        createdir(doypath)
-        createdir(typepath)
-        # if --keep is setted, use copy
-        if keep:
-            print('copy file: %s' %file)
-            shutil.copy(file, typepath)
-        else:
-            print('move file: %s' %file)
-            shutil.move(file, typepath)
+    Example:
 
-    # process subfolders if --recursive is setted
-    if recursive:
-        for child in os.listdir(src_dir):
-            child_path = os.path.join(src_dir, child)
-            if os.path.isdir(child_path):
-                orderdir(child_path, glob_str, out_dir, keep, recursive)
+    >>> which_kind('aggo0420.17d')
+    '17d'
+    >>> which_kind('WARN00DEU_R_20170420000_01D_30S_MO.crx')
+    '17d'
+
+    >>> which_kind('daej0420.17m')
+    '17m'
+    >>> which_kind('DAVS00ATA_R_20170420000_01D_30S_MM.rnx')
+    '17m'
+
+    >>> which_kind('brdc0420.17n')
+    '17n'
+    >>> which_kind('ALGO00CAN_R_20170420000_01D_30S_MN.rnx')
+    '17n'
+
+    >>> which_kind('bjfs0420.17o')
+    '17o'
+    >>> which_kind('SHAO00CHN_R_20170420000_01D_30S_MO.rnx')
+    '17o'
+    """
+    if filename.endswith('.crx'):
+        year = filename[14:16]
+        return '{yr}d'.format(yr=year)
+    elif filename.endswith('.rnx'):
+        year = filename[14:16]
+        kind = filename[-5].lower()
+        return '{yr}{t}'.format(yr=year, t=kind)
+    else:
+        return filename[-3:].lower()
 
 
-# args: user input arguments
+def which_dir(src_file):
+    """Return which directory path a source file should belong, the
+    path is concat by 4-digit year, 3-digit day of year and kind.
+
+    Example:
+
+    >>> which_dir('aggo0420.17o').replace('\\\\', '/')
+    '2017/042/17o'
+
+    >>> which_dir('ALGO00CAN_R_20170420000_01D_30S_MN.rnx').replace('\\\\', '/')
+    '2017/042/17n'
+
+    >>> which_dir('DAVS00ATA_R_20170420000_01D_30S_MM.RNX').replace('\\\\', '/')
+    '2017/042/17m'
+    """
+    filename = os.path.basename(src_file).lower()
+    kind = which_kind(filename)
+    year = kind[0:2]
+    year = '20' + year if year < '80' else '19' + year
+    if filename.endswith('.crx') or filename.endswith('.rnx'):
+        doy = filename[16:19]
+    else:
+        doy = filename[4:7]
+
+    return os.path.join(year, doy, kind)
+
+
 def main(args):
-    """Main function"""
-
-    src_dir, out_dir, glob_str = args.dir, args.out, args.glob
-    createdir(out_dir)
-
-    print('---------------------- input params ----------------------')
-    print('source dir: %s' %src_dir)
-    print('output dir: %s' %out_dir)
-    print('file mode: %s' %glob_str)
-    print('----------------------------------------------------------\n')
-
-    for directory in glob.glob(src_dir):
-        orderdir(directory, glob_str, out_dir, args.keep, args.recursive)
+    """Main function."""
+    globstrs, out_dir = args.files, args.out
+    keep_src, recursive = args.keep, args.recursive
+    # collect input globstrs into a glob list
+    globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
+    # start process
+    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    if not keep_src:
+        print('Delete source files when complete')
+    for src_file in itertools.chain(*globs):
+        dst_dir = os.path.join(out_dir, which_dir(src_file))
+        os.makedirs(dst_dir, exist_ok=True)
+        print('{} => {}'.format(src_file, dst_dir))
+        if keep_src:
+            shutil.copy2(src_file, dst_dir)
+        else:
+            shutil.move(src_file, dst_dir)
 
     return 0
 
 
 def init_args():
     """Initilize function, parse user input"""
-
     # initilize a argument parser
     parser = argparse.ArgumentParser(
-        description="Order rinex files to suit IGS style.")
-
+        description="Order RINEX files to suit IGS style organization."
+    )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='orderfile.py 0.1.4')
+                        version='%(prog)s 0.2.0')
     parser.add_argument('-k', '--keep', action='store_true',
-                        help='keep original file in input_dir')
+                        help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file in subfolders')
-    parser.add_argument('-dir', metavar='<input_dir>', default='.',
-                        help='input dir mode [default: current]')
-    parser.add_argument('-glob', metavar='<mode>', default='*.[0-9][0-9]?*',
-                        help='filename search mode [default: *.[0-9][0-9]?*]')
-    parser.add_argument('-out', metavar='<output_dir>', default='daily',
-                        help='output dir [default: daily in current]')
+                        help='search file recursively')
+    parser.add_argument('-out', metavar='<directory>', default='daily',
+                        help='output directory [default: daily in current]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
 
     return main(parser.parse_args())
 
