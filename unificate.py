@@ -155,7 +155,8 @@ def init_args():
     """Initilize function, parse user input"""
     # initilize a argument parser
     parser = argparse.ArgumentParser(
-        description='Unificate RINEX Obs file using a YAML infomation.')
+        description='Unificate RINEX Obs file using a YAML infomation.'
+    )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s 0.5.0')

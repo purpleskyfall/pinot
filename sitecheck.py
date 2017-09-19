@@ -1,101 +1,107 @@
-#coding=UTF-8
-#create date: 2017/1/6
-#creater: Jon Jiang
-#Python version: 3.4
+#!/usr/bin/env python3
+# coding=utf-8
+"""Check if some RINEX observation files exist in source folder,
+the site list is input using a YAML configuration file.
 
-"""Check if RINEX observation file exist in source folder by a sites list in YAML"""
-
-import os
-import sys
+:author: Jon Jiang
+:email: jiangyingming@live.com
+"""
 import argparse
+import os
+import re
+
 import yaml
 
 
-# dir_path: directory path, filename: name of file,
-# recursive: search file recursively
-def existfile(dir_path, filename, recursive):
-    """check if file exist in dirpath"""
-    # if file in dir_path, return True
-    if os.path.exists(os.path.join(dir_path, filename)):
-        return True
+def is_correct_rinex(src_file, year, doy):
+    """Check if a source file is RINEX observation file observed at
+    given year and doy(day of year), return True or False.
 
-    # process subfolders if --recursive is setted
-    if recursive:
-        for child in os.listdir(dir_path):
-            child_path = os.path.join(dir_path, child)
-            if os.path.isdir(child_path):
-                if existfile(child_path, filename, recursive):
-                    return True
+    Example:
 
-    return False
+    >>> is_correct_rinex('aggo0420.17o', 2017, 42)
+    True
+
+    >>> is_correct_rinex('ALGO0420.17D', 2017, 42)
+    True
+
+    >>> is_correct_rinex('bjfs0420.17n', 2017, 42)
+    False
+
+    >>> is_correct_rinex('WARN00DEU_R_20170420000_01D_30S_MO.crx', 2017, 42)
+    True
+
+    >>> is_correct_rinex('DAVS00ATA_R_20170420000_01D_30S_MM.RNX', 2017, 42)
+    False
+    """
+    year, doy = str(year), '{:03d}'.format(doy)
+    rnxregs = ('^[0-9a-z]{4}' + doy + '[0-9a-z]{1,3}\\.' + year[2:] + '[do]$',
+               '^[0-9a-z]{4}[0-9]{2}[a-z]{3}_[rs]_' + year + doy + '[0-9]{4}'
+               '_[0-9]{2}[dhm]_[0-9]{2}[sz]_[mgcreij]o.(crx|rnx)$')
+
+    return any(re.match(reg, src_file, re.IGNORECASE) for reg in rnxregs)
 
 
-# args: user input arguments
+def check_dir(src_dir, year, doy, missing, recursive):
+    """Check if some sites in missing set have RINEX observation file
+    observed at given year and doy(day of year), if a site observation
+    file exists, remove this site in missing set.
+    """
+    if not os.path.isdir(src_dir):
+        raise ValueError('{} is not a directory!'.format(src_dir))
+    # check files in source directory one by one
+    for _, _, files in os.walk(src_dir):
+        for name in files:
+            correctobs = is_correct_rinex(name, year, doy)
+            if correctobs:
+                site = name[0:4].lower()
+                missing.discard(site)
+        # if not recursive, only check the first level files
+        if not recursive:
+            break
+
+
 def main(args):
-    """Main function"""
-
-    # vaild the configuration file
-    if not os.path.exists(args.cfg):
-        print("Error! Can't find config file: %s!" %args.cfg, file=sys.stderr)
-        return 1
-
-    src_dir, doy, year = args.dir, args.doy, args.yr
-    # laod configuration file
-    with open(args.cfg) as cfgfile:
-        sites = yaml.load(cfgfile)
-    # get 3 digit doy
-    doy = doy.rjust(3, '0')
-    # valid year
-    if not(year.isdigit() and (len(year) == 2 or len(year) == 4)):
-        print("Error! year of data isn't vaild!", file=sys.stderr)
-        return 1
-    # valid doy
-    if not doy.isdigit() or int(doy) > 366:
-        print("Error! day of year isn't vaild!", file=sys.stderr)
-        return 1
-
-    print('---------------------- input params ----------------------')
-    print('source dir: %s' %src_dir)
-    print('year of data: %s' %year)
-    print('day of year: %s' %doy)
-    print('config file: %s' %args.cfg)
-    print('----------------------------------------------------------\n')
-
-    messingsites = []
-    for site in sites:
-        # get observation file name
-        ofilename = site.lower() + doy + '0.' + year[-2:] + 'o'
-        dfilename = site.lower() + doy + '0.' + year[-2:] + 'd'
-        #add messing site into messingsites
-        if not (existfile(src_dir, ofilename, args.recursive) or
-                existfile(src_dir, dfilename, args.recursive)):
-            messingsites.append(site)
-
-    if len(messingsites) > 0:
-        print('sites not found in %s %s: %s.' %(year, doy, ', '.join(messingsites)))
+    """Main function."""
+    dirs, year, doy = args.dirs, args.year, args.doy
+    sites, recursive = yaml.load(args.cfg), args.recursive
+    # create a set of missing sites, initialize it using all sites
+    missing = set(sites)
+    # start process
+    print('Start processing: {} ...'.format(', '.join(dirs)))
+    for directory in dirs:
+        check_dir(directory, year, doy, missing, recursive)
+    # if still some sites in missing, print them
+    if missing:
+        names = sorted(list(missing))
+        message = "Observations not found at {0}, {1} for: {2}"
+        print(message.format(year, doy, ', '.join(names)))
 
     return 0
 
 
 def init_args():
     """Initilize function, parse user input"""
-
     # initilize a argument parser
     parser = argparse.ArgumentParser(
-        description='check if obs file exist by a sites list in YAML.')
+        description='Check if some RINEX observation files exist.'
+    )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='sitecheck.py 0.1.4')
+                        version='%(prog)s 0.2.0')
     parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file in subfolders')
-    parser.add_argument('-dir', metavar='<input_dir>', default='.',
-                        help='input dir [default: current]')
+                        help='search file recursively')
     parser.add_argument('-cfg', metavar='<config>', default='_sites.yml',
-                        help='configuration YAML file [default: _sites.yml]')
-    parser.add_argument('-yr', metavar='<year>', required=True,
-                        help='data observation year [required]')
-    parser.add_argument('-doy', metavar='<doy>', required=True,
-                        help='observation day of year [required]')
+                        type=argparse.FileType('r'),
+                        help='YAML site list file [default: _sites.yml]')
+    parser.add_argument('-yr', metavar='<year>', dest='year', required=True,
+                        type=int, choices=range(1980, 2050),
+                        help='year for observation file [required]')
+    parser.add_argument('-doy', metavar='<doy>', dest='doy', required=True,
+                        type=int, choices=range(1, 367),
+                        help='doy for observation file [required]')
+    parser.add_argument('dirs', metavar='<directory>', nargs='+',
+                        help='directory will be searched')
 
     return main(parser.parse_args())
 

@@ -85,7 +85,8 @@ def init_args():
     """Initilize function, parse user input"""
     # initilize a argument parser
     parser = argparse.ArgumentParser(
-        description='Convert GSI Compact RINEX into Standard RINEX.')
+        description='Convert GSI Compact RINEX into Standard RINEX.'
+    )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s 0.2.0')

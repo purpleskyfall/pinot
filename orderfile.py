@@ -63,13 +63,14 @@ def which_kind(filename):
     """
     if filename.endswith('.crx'):
         year = filename[14:16]
-        return '{yr}d'.format(yr=year)
+        kind = '{yr}d'.format(yr=year)
     elif filename.endswith('.rnx'):
-        year = filename[14:16]
-        kind = filename[-5].lower()
-        return '{yr}{t}'.format(yr=year, t=kind)
+        year, type_code = filename[14:16], filename[-5].lower()
+        kind = '{yr}{t}'.format(yr=year, t=type_code)
     else:
-        return filename[-3:].lower()
+        kind = filename[-3:].lower()
+
+    return kind
 
 
 def which_dir(src_file):
