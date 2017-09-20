@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding=utf-8
 """Convert Standard RINEX into GSI Compact RINEX,
-using concurent.future.
+using concurent.futures.
 
 The convert function rely on RNXCMP software. Check if you have
 installed RNXCMP by typing `rnx2crx -h` in cmd.

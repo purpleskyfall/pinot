@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding=UTF-8
-"""Unificate rinex files by a config.yml file.
+"""Unificate rinex files by a config.yml file,
+using concurent.futures.
 
 The RINEX file edit function rely on TEQC software, Check if you have
 installed TEQC by typing `teqc -help` in cmd.
@@ -21,9 +22,11 @@ import yaml
 
 MAX_THREADING = max(6, os.cpu_count())
 ALPHAREG = re.compile(r'[a-z]+\s*', re.I)
-TEQCITEM = {'agency': '-O.ag', 'antenna': '-O.at', 'delta': '-O.pe',
-            'interval': '-O.dec', 'obs_type': '-O.obs', 'observer': '-O.o',
-            'position': '-O.px', 'receiver': '-O.rt', 'rm_sys': ''}
+TEQCITEM = {
+    'agency': '-O.ag', 'antenna': '-O.at', 'delta': '-O.pe',
+    'interval': '-O.dec', 'obs_type': '-O.obs', 'observer': '-O.o',
+    'position': '-O.px', 'receiver': '-O.rt', 'rm_sys': ''
+}
 
 
 def get_info(site, sitesinfo):
