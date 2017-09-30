@@ -13,12 +13,10 @@ Pinot 部分脚本依赖于 [TEQC][1] 、[RNXCMP][2] 或 [runpkr00][3] 程序，
 - 批量对数据做观测质量分析；
 - 批量进行数据标准化；
 - 批量将数据整理为 IGS 站的组织方式；
-- 批量进行用于数据解算前的子网划分；
-- 批量拷贝 GAMIT/GLOBK 程序的数据解算成果。
+- 批量进行用于数据解算前的子网划分。
 
 Pinot 程序包目前包含以下脚本：
 
-- copyresult.py
 - crnx2rnx.py
 - leica2rnx.py
 - low2upper.py
@@ -34,7 +32,7 @@ Pinot 程序包目前包含以下脚本：
 - up2lower.py
 
 ## 依赖模块
-部分脚本依赖于 [PyYAML][4] 或 [tqdm][5] 模块，PyYAML 是一个解析 YAML 数据的程序包，而 tqdm 是一个在命令行界面显示进度条的软件包。使用以下命令安装 tqdm 模块：
+部分脚本依赖于 [PyYAML][4] 或 [tqdm][5] 模块，PyYAML 是一个解析 YAML 数据的程序包，tqdm 是一个在命令行界面显示进度条的软件包。使用以下命令安装 tqdm 模块：
 
 ```
 $ pip install tqdm
