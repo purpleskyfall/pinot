@@ -43,8 +43,33 @@ def rename_site(src_file, out_dir, sitemap, keep_src):
         shutil.move(src_file, dst_file)
 
 
-def main(args):
+def init_args():
+    """Initilize function, parse user input"""
+    # initilize a argument parser
+    parser = argparse.ArgumentParser(
+        description='Rename GNSS file using a YAML configuration.'
+    )
+    # add arguments
+    parser.add_argument('-v', '--version', action='version',
+                        version='%(prog)s 0.2.0')
+    parser.add_argument('-k', '--keep', action='store_true',
+                        help='keep original file')
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='search file recursively')
+    parser.add_argument('-cfg', metavar='<config>', default='_sitemap.yml',
+                        type=argparse.FileType('r'),
+                        help='configuration YAML file [default: _sitemap.yml]')
+    parser.add_argument('-out', metavar='<directory>', default=None,
+                        help='output directory [default: original folder]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
+
+    return parser.parse_args()
+
+
+def main():
     """Main function."""
+    args = init_args()
     globstrs, out_dir, sitemap = args.files, args.out, yaml.load(args.cfg)
     keep_src, recursive = args.keep, args.recursive
     # make output directory if out_dir is set
@@ -69,29 +94,5 @@ def main(args):
     return 0
 
 
-def init_args():
-    """Initilize function, parse user input"""
-    # initilize a argument parser
-    parser = argparse.ArgumentParser(
-        description='Rename GNSS file using a YAML configuration.'
-    )
-    # add arguments
-    parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.2.0')
-    parser.add_argument('-k', '--keep', action='store_true',
-                        help='keep original file')
-    parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file recursively')
-    parser.add_argument('-cfg', metavar='<config>', default='_sitemap.yml',
-                        type=argparse.FileType('r'),
-                        help='configuration YAML file [default: _sitemap.yml]')
-    parser.add_argument('-out', metavar='<directory>', default=None,
-                        help='output directory [default: original folder]')
-    parser.add_argument('files', metavar='<file>', nargs='+',
-                        help='file will be processed')
-
-    return main(parser.parse_args())
-
-
 if __name__ == '__main__':
-    init_args()
+    main()

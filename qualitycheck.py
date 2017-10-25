@@ -128,8 +128,29 @@ def parallel_teqc(src_files, out_fmt):
         return failed_files
 
 
-def main(args):
+def init_args():
+    """Initilize function, parse user input"""
+    # initilize a argument parser
+    parser = argparse.ArgumentParser(
+        description="Quality check for RINEX observation files using TEQC."
+    )
+    # add arguments
+    parser.add_argument('-v', '--version', action='version',
+                        version='%(prog)s 0.4.0')
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='search file recursively')
+    parser.add_argument('-out', metavar='<format>', default='table',
+                        choices=['list', 'l', 'table', 't'],
+                        help='output format, list or table [default: table]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
+
+    return parser.parse_args()
+
+
+def main():
     """Main function."""
+    args = init_args()
     globstrs, out_fmt, recursive = args.files, args.out, args.recursive
     # collect input globstrs into a glob list
     globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
@@ -151,25 +172,5 @@ def main(args):
     return 0
 
 
-def init_args():
-    """Initilize function, parse user input"""
-    # initilize a argument parser
-    parser = argparse.ArgumentParser(
-        description="Quality check for RINEX observation files using TEQC."
-    )
-    # add arguments
-    parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.0')
-    parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file recursively')
-    parser.add_argument('-out', metavar='<format>', default='table',
-                        choices=['list', 'l', 'table', 't'],
-                        help='output format, list or table [default: table]')
-    parser.add_argument('files', metavar='<file>', nargs='+',
-                        help='file will be processed')
-
-    return main(parser.parse_args())
-
-
 if __name__ == '__main__':
-    init_args()
+    main()

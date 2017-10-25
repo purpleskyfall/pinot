@@ -60,8 +60,30 @@ def parallel_run(function, argvs):
         return failed_files
 
 
-def main(args):
+def init_args():
+    """Initilize function, parse user input"""
+    # initilize a argument parser
+    parser = argparse.ArgumentParser(
+        description='Convert GSI Compact RINEX into Standard RINEX.'
+    )
+    # add arguments
+    parser.add_argument('-v', '--version', action='version',
+                        version='%(prog)s 0.2.0')
+    parser.add_argument('-k', '--keep', action='store_true',
+                        help='keep original file')
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='search file recursively')
+    parser.add_argument('-out', metavar='<directory>', default='rinex',
+                        help='output directory [default: rinex in current]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
+
+    return parser.parse_args()
+
+
+def main():
     """Main function."""
+    args = init_args()
     globstrs, out_dir = args.files, args.out
     keep_src, recursive = args.keep, args.recursive
     # create output directory
@@ -81,26 +103,5 @@ def main(args):
         print('\nAll convert tasks are finished!')
 
 
-def init_args():
-    """Initilize function, parse user input"""
-    # initilize a argument parser
-    parser = argparse.ArgumentParser(
-        description='Convert GSI Compact RINEX into Standard RINEX.'
-    )
-    # add arguments
-    parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.2.0')
-    parser.add_argument('-k', '--keep', action='store_true',
-                        help='keep original file')
-    parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file recursively')
-    parser.add_argument('-out', metavar='<directory>', default='rinex',
-                        help='output directory [default: rinex in current]')
-    parser.add_argument('files', metavar='<file>', nargs='+',
-                        help='file will be processed')
-
-    return main(parser.parse_args())
-
-
 if __name__ == '__main__':
-    init_args()
+    main()

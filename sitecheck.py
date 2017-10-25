@@ -61,25 +61,6 @@ def check_dir(src_dir, year, doy, missing, recursive):
             break
 
 
-def main(args):
-    """Main function."""
-    dirs, year, doy = args.dirs, args.year, args.doy
-    sites, recursive = yaml.load(args.cfg), args.recursive
-    # create a set of missing sites, initialize it using all sites
-    missing = set(sites)
-    # start process
-    print('Start processing: {} ...'.format(', '.join(dirs)))
-    for directory in dirs:
-        check_dir(directory, year, doy, missing, recursive)
-    # if still some sites in missing, print them
-    if missing:
-        names = sorted(list(missing))
-        message = "Observations not found at {0}, {1} for: {2}"
-        print(message.format(year, doy, ', '.join(names)))
-
-    return 0
-
-
 def init_args():
     """Initilize function, parse user input"""
     # initilize a argument parser
@@ -103,8 +84,28 @@ def init_args():
     parser.add_argument('dirs', metavar='<directory>', nargs='+',
                         help='directory will be searched')
 
-    return main(parser.parse_args())
+    return parser.parse_args()
+
+
+def main():
+    """Main function."""
+    args = init_args()
+    dirs, year, doy = args.dirs, args.year, args.doy
+    sites, recursive = yaml.load(args.cfg), args.recursive
+    # create a set of missing sites, initialize it using all sites
+    missing = set(sites)
+    # start process
+    print('Start processing: {} ...'.format(', '.join(dirs)))
+    for directory in dirs:
+        check_dir(directory, year, doy, missing, recursive)
+    # if still some sites in missing, print them
+    if missing:
+        names = sorted(list(missing))
+        message = "Observations not found at {0}, {1} for: {2}"
+        print(message.format(year, doy, ', '.join(names)))
+
+    return 0
 
 
 if __name__ == '__main__':
-    init_args()
+    main()

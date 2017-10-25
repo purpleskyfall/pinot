@@ -88,8 +88,34 @@ def show_difference(src_file, difference, out_fmt):
             print(record.format(filename, key, value[0], value[1]))
 
 
-def main(args):
+def init_args():
+    """Initilize function, parse user input"""
+    # initilize a argument parser
+    parser = argparse.ArgumentParser(
+        description="Compare site's meta between files and reference."
+    )
+    # add arguments
+    parser.add_argument('-v', '--version', action='version',
+                        version='%(prog)s 0.4.0')
+    parser.add_argument('-r', '--recursive', action='store_true',
+                        help='search file recursively')
+    parser.add_argument('-cfg', metavar='<config>', default='_sitesinfo.yml',
+                        type=argparse.FileType('r'),
+                        help='configuration file [default: _sitesinfo.yml]')
+    parser.add_argument('-out', metavar='<format>', default='list',
+                        choices=['list', 'l', 'table', 't'],
+                        help='output format, list or table [default: list]')
+    parser.add_argument('-thd', metavar='<threshold>', default=10, type=int,
+                        help='threshold for position change [default: 10(m)]')
+    parser.add_argument('files', metavar='<file>', nargs='+',
+                        help='file will be processed')
+
+    return parser.parse_args()
+
+
+def main():
     """Main function."""
+    args = init_args()
     globstrs, out_fmt, sitesinfo = args.files, args.out, yaml.load(args.cfg)
     threshold, recursive = args.thd, args.recursive
     # collect input globstrs into a glob list
@@ -121,30 +147,5 @@ def main(args):
     return 0
 
 
-def init_args():
-    """Initilize function, parse user input"""
-    # initilize a argument parser
-    parser = argparse.ArgumentParser(
-        description="Compare site's meta between files and reference."
-    )
-    # add arguments
-    parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.0')
-    parser.add_argument('-r', '--recursive', action='store_true',
-                        help='search file recursively')
-    parser.add_argument('-cfg', metavar='<config>', default='_sitesinfo.yml',
-                        type=argparse.FileType('r'),
-                        help='configuration file [default: _sitesinfo.yml]')
-    parser.add_argument('-out', metavar='<format>', default='list',
-                        choices=['list', 'l', 'table', 't'],
-                        help='output format, list or table [default: list]')
-    parser.add_argument('-thd', metavar='<threshold>', default=10, type=int,
-                        help='threshold for position change [default: 10(m)]')
-    parser.add_argument('files', metavar='<file>', nargs='+',
-                        help='file will be processed')
-
-    return main(parser.parse_args())
-
-
 if __name__ == '__main__':
-    init_args()
+    main()
