@@ -127,7 +127,7 @@ def parallel_run(function, argvs):
             if res:
                 failed_files.append(res)
 
-        return failed_files
+    return failed_files
 
 
 def init_args():

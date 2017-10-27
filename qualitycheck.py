@@ -125,7 +125,7 @@ def parallel_teqc(src_files, out_fmt):
             else:
                 failed_files.append(os.path.basename(src_file))
 
-        return failed_files
+    return failed_files
 
 
 def init_args():
