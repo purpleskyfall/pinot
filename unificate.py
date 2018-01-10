@@ -16,6 +16,7 @@ import itertools
 import os
 import re
 import subprocess
+import sys
 
 import tqdm
 import yaml
@@ -102,7 +103,8 @@ def teqc(src_file, args, out_dir, keep):
     # run TEQC, redirect stdout into dst_file, and ignore stderr
     args = ' '.join(['teqc', *args, src_file])
     with open(dst_file, 'w') as dst_writer:
-        status = subprocess.call(args, stdout=dst_writer, stderr=subprocess.DEVNULL)
+        status = subprocess.call(
+            args, stdout=dst_writer, stderr=subprocess.DEVNULL, shell=True)
     # check exit status of teqc: {0: success, >0: error}
     if status > 0:
         # if run teqc failed, remove dest file and return filename
@@ -117,11 +119,14 @@ def teqc(src_file, args, out_dir, keep):
 
 def parallel_run(function, argvs):
     """Parallel run function using argvs, display a process bar."""
+    # check platform, use ASCII process bar in Windows
+    use_ascii = True if sys.platform == 'win32' else False
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADING) as executor:
         todo_list = [executor.submit(function, *argv) for argv in argvs]
         task_iter = futures.as_completed(todo_list)
         failed_files = []
-        for future in tqdm.tqdm(task_iter, total=len(todo_list), unit='file'):
+        for future in tqdm.tqdm(
+                task_iter, total=len(todo_list), ascii=use_ascii, unit='file'):
             # return None means task is success
             res = future.result()
             if res:
@@ -138,7 +143,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.5.0')
+                        version='%(prog)s 0.5.1')
     parser.add_argument('-k', '--keep', action='store_true',
                         help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',

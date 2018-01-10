@@ -15,6 +15,7 @@ import glob
 import itertools
 import os
 import subprocess
+import sys
 
 import tqdm
 
@@ -32,7 +33,8 @@ def rnx2crx(src_file, out_dir, keep):
     # and ignore the stderr.
     args = 'rnx2crx', '-', src_file
     with open(dst_file, 'w') as dst_writer:
-        status = subprocess.call(args, stdout=dst_writer, stderr=subprocess.DEVNULL)
+        status = subprocess.call(
+            args, stdout=dst_writer, stderr=subprocess.DEVNULL, shell=True)
     # check exit status of rnx2crx: {0: success, 1: error, 2: warning}
     if status == 1:
         # if run rnx2crx failed, remove dest file and return filename
@@ -47,11 +49,14 @@ def rnx2crx(src_file, out_dir, keep):
 
 def parallel_run(function, argvs):
     """Parallel run function using argvs, display a process bar."""
+    # check platform, use ASCII process bar in Windows
+    use_ascii = True if sys.platform == 'win32' else False
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADING) as executor:
         todo_list = [executor.submit(function, *argv) for argv in argvs]
         task_iter = futures.as_completed(todo_list)
         failed_files = []
-        for future in tqdm.tqdm(task_iter, total=len(todo_list), unit='file'):
+        for future in tqdm.tqdm(
+                task_iter, total=len(todo_list), ascii=use_ascii, unit='file'):
             # return None means task is success
             res = future.result()
             if res:
@@ -68,7 +73,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.2.0')
+                        version='%(prog)s 0.2.1')
     parser.add_argument('-k', '--keep', action='store_true',
                         help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
