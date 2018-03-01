@@ -22,6 +22,8 @@ QUALITYINFO = (
     {'name': 'start', 'flag': 'Time of start of window :', 'pos': slice(25, 51)},
     {'name': 'end', 'flag': 'Time of  end  of window :', 'pos': slice(37, 51)},
     {'name': 'length', 'flag': 'Time line window length :', 'pos': slice(26, 42)},
+    {'name': 'MP1', 'flag': 'Moving average MP12     :', 'pos': slice(26, 31)},
+    {'name': 'MP2', 'flag': 'Moving average MP21     :', 'pos': slice(26, 31)},
     {'name': 'SN1', 'flag': 'Mean S1                 :', 'pos': slice(26, 31)},
     {'name': 'SN2', 'flag': 'Mean S2                 :', 'pos': slice(26, 31)}
 )
@@ -52,18 +54,20 @@ def parse_report(report):
     ... 'Time of start of window : 2017 Aug 10  00:00:00.000',
     ... 'Time of  end  of window : 2017 Aug 10  23:59:30.000',
     ... 'Time line window length : 23.99 hour(s), ticked every ...',
+    ... 'Moving average MP12     : 0.426582 m',
+    ... 'Moving average MP21     : 0.384306 m',
     ... 'Mean S1                 : 46.95 (sd=5.80 n=49483)',
     ... 'Mean S2                 : 42.21 (sd=8.18 n=48411)',
     ... '      first epoch    last epoch    hrs   dt  #expt  #have   %'
     ... '   mp1   mp2 o/slps',
     ... 'SUM 17  8 10 00:00 17  8 10 23:59 24.00  30     -   47669  - '
-    ... '  0.43  0.42   3972'
+    ... '  0.43  0.38   3972'
     ... ]
     >>> result = parse_report(report) # doctest: +NORMALIZE_WHITESPACE
     >>> result[0:4]
     ('2017-08-10', '00:00:00.000', '23:59:30.000', '23.99 hour(s)')
     >>> [round(num, 2) for num in result[4:]]
-    [46.95, 42.21, 0.43, 0.42, 0.25]
+    [46.95, 42.21, 0.43, 0.38, 0.25]
     """
     # because the order of output messages are same, so we only need to
     # check the segment once.
@@ -77,13 +81,13 @@ def parse_report(report):
             break
     # restruct the quality marks into a tuple
     sn1, sn2 = float(marks['SN1']), float(marks['SN2'])
+    mp1, mp2 = float(marks['MP1']), float(marks['MP2'])
     date = datetime.datetime.strptime(marks['start'][0:11], '%Y %b %d')
     start, end = marks['start'][11:].strip(), marks['end']
     length = marks['length'].split(',')[0]
-    # get MP1, MP2, CSR from the last line of report
+    # get CSR from the last line of report
     last_line = report[-1]
-    mp1, mp2 = float(last_line[63:67]), float(last_line[69:73])
-    olps = float(last_line[75:])
+    olps = float(last_line.split()[-1])
     csr = 1000 / olps
 
     result = (date.strftime('%Y-%m-%d'), start, end,
@@ -136,7 +140,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.0')
+                        version='%(prog)s 0.4.1')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-out', metavar='<format>', default='table',
