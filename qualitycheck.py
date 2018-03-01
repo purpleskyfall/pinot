@@ -22,8 +22,8 @@ QUALITYINFO = (
     {'name': 'start', 'flag': 'Time of start of window :', 'pos': slice(25, 51)},
     {'name': 'end', 'flag': 'Time of  end  of window :', 'pos': slice(37, 51)},
     {'name': 'length', 'flag': 'Time line window length :', 'pos': slice(26, 42)},
-    {'name': 'MP1', 'flag': 'Moving average MP12     :', 'pos': slice(26, 31)},
-    {'name': 'MP2', 'flag': 'Moving average MP21     :', 'pos': slice(26, 31)},
+    {'name': 'MP1', 'flag': 'Moving average MP12     :', 'pos': slice(26, 32)},
+    {'name': 'MP2', 'flag': 'Moving average MP21     :', 'pos': slice(26, 32)},
     {'name': 'SN1', 'flag': 'Mean S1                 :', 'pos': slice(26, 31)},
     {'name': 'SN2', 'flag': 'Mean S2                 :', 'pos': slice(26, 31)}
 )
@@ -54,7 +54,7 @@ def parse_report(report):
     ... 'Time of start of window : 2017 Aug 10  00:00:00.000',
     ... 'Time of  end  of window : 2017 Aug 10  23:59:30.000',
     ... 'Time line window length : 23.99 hour(s), ticked every ...',
-    ... 'Moving average MP12     : 0.426582 m',
+    ... 'Moving average MP12     : 0.425582 m',
     ... 'Moving average MP21     : 0.384306 m',
     ... 'Mean S1                 : 46.95 (sd=5.80 n=49483)',
     ... 'Mean S2                 : 42.21 (sd=8.18 n=48411)',
@@ -140,7 +140,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.1')
+                        version='%(prog)s 0.4.2')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-out', metavar='<format>', default='table',
