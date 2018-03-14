@@ -10,6 +10,7 @@ installed TEQC by typing `teqc -help` in cmd.
 :email: jiangyingming@live.com
 """
 from concurrent import futures
+from textwrap import shorten
 import argparse
 import glob
 import itertools
@@ -171,7 +172,7 @@ def main():
     files = itertools.chain(*globs)
     # make input args for teqc function
     teqc_args = ((src, make_args(src, infos), out_dir, keep_src) for src in files)
-    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    print('Start processing: {}'.format(shorten(', '.join(globstrs), 62)))
     if not keep_src:
         print('Delete source files when complete')
     # start parallel task, get a filename list of unificate failed.

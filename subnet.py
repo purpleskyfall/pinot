@@ -8,6 +8,7 @@ RINEX observation files into the subnet folders.
 :author: Jon Jiang
 :email: jiangyingming@live.com
 """
+from textwrap import shorten
 import argparse
 import glob
 import itertools
@@ -55,7 +56,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.0')
+                        version='%(prog)s 0.4.1')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-k', '--keep', action='store_true',
@@ -85,7 +86,7 @@ def main():
     # collect input globstrs into a glob list
     globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
     # start process
-    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    print('Start processing: {}'.format(shorten(', '.join(globstrs), 62)))
     if not keep_src:
         print('Delete source files when complete')
     missing = set()

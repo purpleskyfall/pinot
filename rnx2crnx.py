@@ -10,6 +10,7 @@ installed RNXCMP by typing `rnx2crx -h` in cmd.
 :email: jiangyingming@live.com
 """
 from concurrent import futures
+from textwrap import shorten
 import argparse
 import glob
 import itertools
@@ -73,7 +74,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.2.1')
+                        version='%(prog)s 0.2.2')
     parser.add_argument('-k', '--keep', action='store_true',
                         help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
@@ -97,7 +98,7 @@ def main():
     globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
     # make input args for rnx2crx function
     conv_args = ((src, out_dir, keep_src) for src in itertools.chain(*globs))
-    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    print('Start processing: {}'.format(shorten(', '.join(globstrs), 62)))
     if not keep_src:
         print('Delete source files when complete')
     # start parallel task, get a file name list of convert failed.

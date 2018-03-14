@@ -10,6 +10,7 @@ you have installed TEQC by typing `teqc -help` in cmd.
 :email: jiangyingming@live.com
 """
 from concurrent import futures
+from textwrap import shorten
 import argparse
 import datetime
 import glob
@@ -140,7 +141,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.2')
+                        version='%(prog)s 0.4.3')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-out', metavar='<format>', default='table',
@@ -160,7 +161,7 @@ def main():
     globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
     src_files = [src for src in itertools.chain(*globs)]
     # make input args for teqc function
-    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    print('Start processing: {}'.format(shorten(', '.join(globstrs), 62)))
     # if output format is table, print a table header first
     if out_fmt == 'table' or out_fmt == 't':
         header = ('file', 'date', 'start', 'end', 'length',

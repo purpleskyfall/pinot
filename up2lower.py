@@ -5,6 +5,7 @@
 :author: Jon Jiang
 :email: jiangyingming@live.com
 """
+from textwrap import shorten
 import argparse
 import glob
 import itertools
@@ -39,7 +40,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.2.0')
+                        version='%(prog)s 0.2.1')
     parser.add_argument('-k', '--keep', action='store_true',
                         help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
@@ -66,7 +67,7 @@ def main():
     if out_dir is not None:
         os.makedirs(out_dir, exist_ok=True)
     # collect input globstrs into a glob list
-    print('Start processing: {} ...'.format(', '.join(globstrs)))
+    print('Start processing: {}'.format(shorten(', '.join(globstrs), 62)))
     globs = [glob.iglob(globstr, recursive=recursive) for globstr in globstrs]
     count = 0
     for src_file in itertools.chain(*globs):

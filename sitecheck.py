@@ -6,6 +6,7 @@ the site list is input using a YAML configuration file.
 :author: Jon Jiang
 :email: jiangyingming@live.com
 """
+from textwrap import shorten
 import argparse
 import os
 import re
@@ -69,7 +70,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.2.0')
+                        version='%(prog)s 0.2.1')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-cfg', metavar='<config>', default='_sites.yml',
@@ -95,7 +96,7 @@ def main():
     # create a set of missing sites, initialize it using all sites
     missing = set(sites)
     # start process
-    print('Start processing: {} ...'.format(', '.join(dirs)))
+    print('Start processing: {}'.format(shorten(', '.join(dirs), 62)))
     for directory in dirs:
         check_dir(directory, year, doy, missing, recursive)
     # if still some sites in missing, print them
