@@ -35,7 +35,7 @@ def crx2rnx(src_file, out_dir, keep):
     args = 'crx2rnx', '-', src_file
     with open(dst_file, 'w') as dst_writer:
         status = subprocess.call(
-            args, stdout=dst_writer, stderr=subprocess.DEVNULL, shell=True)
+            args, stdout=dst_writer, stderr=subprocess.DEVNULL)
     # check exit status of crx2rnx: {0: success, 1: error, 2: warning}
     if status == 1:
         # if run crx2rnx failed, remove dest file and return filename
@@ -74,7 +74,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.2.2')
+                        version='%(prog)s 0.2.3')
     parser.add_argument('-k', '--keep', action='store_true',
                         help='keep original file')
     parser.add_argument('-r', '--recursive', action='store_true',
