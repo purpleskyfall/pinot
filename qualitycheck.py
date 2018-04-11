@@ -61,14 +61,14 @@ def parse_report(report):
     ... 'Mean S2                 : 42.21 (sd=8.18 n=48411)',
     ... '      first epoch    last epoch    hrs   dt  #expt  #have   %'
     ... '   mp1   mp2 o/slps',
-    ... 'SUM 17  8 10 00:00 17  8 10 23:59 24.00  30     -   47669  - '
+    ... 'SUM 17  8 10 00:00 17  8 10 23:59 14.52  30     -   47669  - '
     ... '  0.43  0.38   3972'
     ... ]
     >>> result = parse_report(report) # doctest: +NORMALIZE_WHITESPACE
-    >>> result[0:4]
-    ('2017-08-10', '00:00:00.000', '23:59:30.000', '23.99 hour(s)')
-    >>> [round(num, 2) for num in result[4:]]
-    [46.95, 42.21, 0.43, 0.38, 0.25]
+    >>> result[0:3]
+    ('2017-08-10', '00:00:00.000', '23:59:30.000')
+    >>> [round(num, 2) for num in result[3:]]
+    [14.52, 46.95, 42.21, 0.43, 0.38, 0.25]
     """
     # because the order of output messages are same, so we only need to
     # check the segment once.
@@ -85,9 +85,11 @@ def parse_report(report):
     mp1, mp2 = float(marks['MP1']), float(marks['MP2'])
     date = datetime.datetime.strptime(marks['start'][0:11], '%Y %b %d')
     start, end = marks['start'][11:].strip(), marks['end']
-    length = marks['length'].split(',')[0]
-    # get CSR from the last line of report
+    # get observation data length
     last_line = report[-1]
+    # length = marks['length'].split(',')[0]
+    length = float(last_line.split()[-8])
+    # get CSR from the last line of report
     olps = float(last_line.split()[-1])
     csr = 1000 / olps
 
@@ -101,12 +103,12 @@ def print_marks(marks, out_fmt):
     """Print marks of quality check, the out_fmt is list or table."""
     if out_fmt == 'list' or out_fmt == 'l':
         message = ('\n{0} quality marks:\n' 'date: {1}\n' 'start: {2}\n'
-                   'end: {3}\n' 'length: {4}\n' 'SN1: {5:.2f}\n'
+                   'end: {3}\n' 'hours: {4}\n' 'SN1: {5:.2f}\n'
                    'SN2: {6:.2f}\n' 'MP1: {7:.2f}\n' 'MP2: {8:.2f}\n'
                    'CSR: {9:.2f}')
         print(message.format(*marks))
     else:
-        message = ('{0: ^14s} {1: ^12s} {2: ^14s} {3: ^14s} {4: ^15s}  '
+        message = ('{0: ^14s} {1: ^12s} {2: ^14s} {3: ^14s} {4: 6.2f} '
                    '{5: 6.2f}  {6: 6.2f}  {7: 6.2f}  {8: 6.2f}  {9: 5.2f}')
         print(message.format(os.path.basename(marks[0]), *marks[1:]))
 
@@ -141,7 +143,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.3')
+                        version='%(prog)s 0.4.4')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-out', metavar='<format>', default='table',
@@ -164,9 +166,9 @@ def main():
     print('Start processing: {}'.format(shorten(', '.join(globstrs), 62)))
     # if output format is table, print a table header first
     if out_fmt == 'table' or out_fmt == 't':
-        header = ('file', 'date', 'start', 'end', 'length',
+        header = ('file', 'date', 'start', 'end', 'hours',
                   'SN1', 'SN2', 'MP1', 'MP2', 'CSR')
-        style = ('\n{0: ^14s} {1: ^12s} {2: ^14s} {3: ^14s} {4: ^15s} '
+        style = ('\n{0: ^14s} {1: ^12s} {2: ^14s} {3: ^14s} {4: >6s} '
                  '{5: >6s}  {6: >6s}  {7: >6s}  {8: >6s}  {9: >5s}')
         print(style.format(*header))
     # start parallel processing
