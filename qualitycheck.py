@@ -39,10 +39,7 @@ def quality_check(src_file):
     args = 'teqc', '+qc', '-plot', '-rep', src_file
     status, output = subprocess.getstatusoutput(' '.join(args))
     # if exit status of TEQC software is not 0, means error
-    if status > 0:
-        return None
-
-    return output.split('\n')
+    return None if status > 0 else output.split('\n')
 
 
 def parse_report(report):
@@ -74,7 +71,7 @@ def parse_report(report):
     marks = {}
     for item in QUALITYINFO:
         for line in report:
-            if item['flag'] not in line:
+            if item['flag'] in line:
                 marks[item['name']] = line[item['pos']].strip()
                 break
     # restruct the quality marks into a tuple
