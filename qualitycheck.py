@@ -70,31 +70,29 @@ def parse_report(report):
     >>> [round(num, 2) for num in result[3:]]
     [14.52, 46.95, 42.21, 0.43, 0.38, 0.25]
     """
-    # because the order of output messages are same, so we only need to
-    # check the segment once.
-    marks, last_no = {}, 0
+    # search quality marks in the report
+    marks = {}
     for item in QUALITYINFO:
-        for number, line in enumerate(report[last_no:], last_no):
+        for line in report:
             if item['flag'] not in line:
-                continue
-            marks[item['name']] = line[item['pos']].strip()
-            last_no = number
-            break
+                marks[item['name']] = line[item['pos']].strip()
+                break
     # restruct the quality marks into a tuple
-    sn1, sn2 = float(marks['SN1']), float(marks['SN2'])
-    mp1, mp2 = float(marks['MP1']), float(marks['MP2'])
+    # get SN1, SN2, MP1 & MP2, they may not found in the report
+    sn1, sn2 = float(marks.get('SN1', 'nan')), float(marks.get('SN2', 'nan'))
+    mp1, mp2 = float(marks.get('MP1', 'nan')), float(marks.get('MP2', 'nan'))
     date = datetime.datetime.strptime(marks['start'][0:11], '%Y %b %d')
     start, end = marks['start'][11:].strip(), marks['end']
-    # get observation data length
-    last_line = report[-1]
-    # length = marks['length'].split(',')[0]
-    length = float(last_line.split()[-8])
-    # get CSR from the last line of report
-    olps = float(last_line.split()[-1])
-    csr = 1000 / olps
+    # get observation data length, TEQC may output a warn at the tail
+    last_line = report[-1] if report[-1].startswith('SUM') else report[-3]
+    last_line_pieces = last_line.split()
+    length = float(last_line_pieces[-8])
+    # get CSR from the last line of report, the olps may equal 0
+    olps = float(last_line_pieces[-1])
+    csr = float('nan') if olps == 0 else 1000 / olps
 
-    result = (date.strftime('%Y-%m-%d'), start, end,
-              length, sn1, sn2, mp1, mp2, csr)
+    result = (date.strftime('%Y-%m-%d'), start, end, length, sn1, sn2, mp1,
+              mp2, csr)
 
     return result
 
@@ -143,7 +141,7 @@ def init_args():
     )
     # add arguments
     parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s 0.4.4')
+                        version='%(prog)s 0.4.5')
     parser.add_argument('-r', '--recursive', action='store_true',
                         help='search file recursively')
     parser.add_argument('-out', metavar='<format>', default='table',
