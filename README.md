@@ -35,7 +35,7 @@ Pinot 程序包目前包含以下脚本：
 部分脚本依赖于 [PyYAML][4] 或 [tqdm][5] 模块，PyYAML 是一个解析 YAML 数据的程序包，tqdm 是一个在命令行界面显示进度条的软件包。使用以下命令安装 tqdm 模块：
 
 ```
-$ pip install tqdm
+$ pip install tqdm hatanaka
 ```
 
 PyYAML 程序包安装，请参考博文：[PyYAML 安装与使用演示][6]。

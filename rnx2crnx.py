@@ -15,10 +15,11 @@ import argparse
 import glob
 import itertools
 import os
-import subprocess
 import sys
+from traceback import print_exc
 
 import tqdm
+import hatanaka
 
 MAX_THREADING = max(6, os.cpu_count())
 
@@ -30,17 +31,15 @@ def rnx2crx(src_file, out_dir, keep):
         dst_file = os.path.join(out_dir, filename[0:-3]+'crx')
     else:
         dst_file = os.path.join(out_dir, filename[0:-1]+'d')
-    # run rnx2crx, redirect compact RINEX stdout into destination file
-    # and ignore the stderr.
-    args = 'rnx2crx', '-', src_file
-    with open(dst_file, 'w') as dst_writer:
-        status = subprocess.call(
-            args, stdout=dst_writer, stderr=subprocess.DEVNULL)
-    # check exit status of rnx2crx: {0: success, 1: error, 2: warning}
-    if status == 1:
-        # if run rnx2crx failed, remove dest file and return filename
-        os.remove(dst_file)
+
+    try:
+        data = hatanaka.compress(src_file, compression='none')
+    except:
+        print_exc()
         return filename
+    with open(dst_file, 'wb') as dst_writer:
+        dst_writer.write(data)
+
     # remove source file if keep is False when successful
     if not keep:
         os.remove(src_file)
