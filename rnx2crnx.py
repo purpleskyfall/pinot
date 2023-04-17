@@ -51,7 +51,7 @@ def rnx2crx(src_file, out_dir, keep):
 def parallel_run(function, argvs):
     """Parallel run function using argvs, display a process bar."""
     # check platform, use ASCII process bar in Windows
-    use_ascii = True if sys.platform == 'win32' else False
+    use_ascii = True if sys.getwindowsversion().major < 10 else False
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADING) as executor:
         todo_list = [executor.submit(function, *argv) for argv in argvs]
         task_iter = futures.as_completed(todo_list)
