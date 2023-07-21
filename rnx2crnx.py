@@ -20,12 +20,15 @@ import sys
 
 import tqdm
 
-MAX_THREADING = max(6, os.cpu_count())
+MAX_THREADING = min(4, os.cpu_count())
 
 
 def rnx2crx(src_file, out_dir, keep):
     """Convert compact RINEX file to standard RINEX."""
     filename = os.path.basename(src_file)
+    # check if source file is already compact rinex file
+    if filename.lower().endswith('crx') or filename.lower().endswith('d'):
+        return
     if filename.lower().endswith('rnx'):
         dst_file = os.path.join(out_dir, filename[0:-3]+'crx')
     else:
